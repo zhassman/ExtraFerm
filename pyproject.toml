@@ -5,12 +5,17 @@ description = "Passive extended matchgate quantum circuit simulator"
 readme = "README.md"
 requires-python = ">=3.8"
 dependencies = [
-  "numpy>=1.25",     # for your Python‐side arrays & wrappers
+  "numpy>=1.25",
+  "scipy",
+  "qiskit",
 ]
 
 [build-system]
-requires = ["maturin>=1.2"] 
-build-backend = "maturin"
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
 
-[tool.maturin]
-bindings = "pyo3"     # tells maturin you’re using PyO3
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-dir]
+"" = "src"

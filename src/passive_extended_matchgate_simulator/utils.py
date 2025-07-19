@@ -3,7 +3,8 @@ import numpy as np
 import math
 from typing import Tuple
 from numpy.typing import NDArray
-from qiskit.circuit import QuantumCircuit
+from qiskit.circuit import QuantumCircuit, QuantumRegister
+import ffsim
 
 
 CircuitData = Tuple[
@@ -197,11 +198,136 @@ def calculate_extent(
     return prod
 
 
-def chemistry_to_compatible():
+def ucj_to_compatible(
+        circuit: QuantumCircuit
+) -> QuantumCircuit:
     """
     Takes an ffsim-style qiskit quantum circuit and makes it compatible 
     with the simulator.
+
+    Args:
+        circuit: This should be a quantum circuit with only a hartree_fock_jw gate
+        and a ucj_balanced_jw gate.
     """
-    # decompose hf to x gates
-    # decompose diag coulomb to c-phase gates
-    # remove global phase gate
+    assert len(circuit.data) == 2
+    assert circuit.data[0].operation.name == 'hartree_fock_jw'
+    assert circuit.data[1].operation.name == 'ucj_balanced_jw'
+    decomposed = circuit.decompose().decompose(gates_to_decompose=['slater_jw', 'diag_coulomb_jw'])
+
+    num_qubits = decomposed.num_qubits
+    compatible = QuantumCircuit(num_qubits)
+
+    for instruction in decomposed.data:
+        if instruction.operation.name == "x":
+            q = instruction.qubits[0]._index
+            compatible.append(instruction.operation, [q])
+
+    for instruction in decomposed.data:
+        if instruction.operation.name =="cp":
+            q1 = instruction.qubits[0]._index
+            q2 = instruction.qubits[1]._index
+            compatible.append(instruction.operation, [q1, q2])
+
+        elif instruction.operation.name == "orb_rot_jw":
+            compatible.append(instruction.operation, range(num_qubits))
+
+        elif instruction.operation.name == "global_phase":
+            pass
+
+    return compatible
+
+
+def ucj_to_compatible_fully_reduced(
+        circuit: QuantumCircuit
+) -> QuantumCircuit:
+    """
+    Takes an ffsim-style qiskit quantum circuit and makes it compatible 
+    with the simulator. Reduces orb_rot_jw all the way down to 2 qubit gates.
+
+    Args:
+        circuit: This should be a quantum circuit with only a hartree_fock_jw gate
+        and a ucj_balanced_jw gate.
+    """
+    assert len(circuit.data) == 2
+    assert circuit.data[0].operation.name == 'hartree_fock_jw'
+    assert circuit.data[1].operation.name == 'ucj_balanced_jw'
+    decomposed = circuit.decompose(reps=2)
+
+    num_qubits = decomposed.num_qubits
+    compatible = QuantumCircuit(num_qubits)
+
+    for instruction in decomposed.data:
+        if instruction.operation.name == "x":
+            q = instruction.qubits[0]._index
+            compatible.append(instruction.operation, [q])
+
+    for instruction in decomposed.data:
+        if instruction.operation.name in ["cp", "xx_plus_yy"]:
+            q1 = instruction.qubits[0]._index
+            q2 = instruction.qubits[1]._index
+            compatible.append(instruction.operation, [q1, q2])
+
+        elif instruction.operation.name == "p":
+            q = instruction.qubits[0]._index
+            compatible.append(instruction.operation, [q])
+
+
+        elif instruction.operation.name == "global_phase":
+            pass
+
+    return compatible
+
+
+def make_parameterized_controlled_phase_circuit(
+        norb: int, 
+        nelec: tuple[int, int],
+        mean: float, 
+        var: float
+) -> QuantumCircuit:
+    """
+    Crates a circuit consisting an orbital rotation followed by a number of 
+    controlled phase gates followed by another orbital rotation.
+
+    norb: The number of spatial orbitals
+    nelec: The number of electrons in spatial orbital
+    mean: specifies the average angles of the controlled-phase gates
+    var: specifies the variance of the angles of the controlled-phase gates
+    """
+    
+    alpha_alpha_indices = [(p, p + 1) for p in range(norb - 1)]
+    alpha_beta_indices = [(p, p) for p in range(norb)]
+    qubits = QuantumRegister(2 * norb)
+    circuit = QuantumCircuit(qubits)
+    scale = math.sqrt(var)
+    ucj_op = ffsim.random.random_ucj_op_spin_balanced(norb, 
+                                                    interaction_pairs=(alpha_alpha_indices, alpha_beta_indices),
+                                                    with_final_orbital_rotation=False,
+                                                    diag_coulomb_mean=mean, 
+                                                    diag_coulomb_scale=scale, 
+                                                    diag_coulomb_normal=True)
+    circuit.append(ffsim.qiskit.PrepareHartreeFockJW(norb, nelec), qubits)
+    circuit.append(ffsim.qiskit.UCJOpSpinBalancedJW(ucj_op), qubits)
+
+    return circuit
+
+
+def get_bitstrings_and_probs(
+        circuit: QuantumCircuit, 
+        norb: int, 
+        nelec: tuple[int, int]
+) -> tuple[list[int], list[np.float64]]:
+    """
+    Returns a pair of lists, the former containing all valid bitstrings
+    given by the ffsim statevector simulation and latter containing their
+    respective probabilities.
+    
+    Args:
+        circuit: A quantum circuit compatible with ffsim
+        norb: The number of spatial orbitals
+        nelec: The number of electrons in spatial orbital
+    """
+    
+    statevec = ffsim.qiskit.final_state_vector(circuit)
+    probs = np.abs(statevec.vec)**2
+    bitstrings = ffsim.addresses_to_strings(range(len(probs)), norb, nelec)
+    return bitstrings, probs

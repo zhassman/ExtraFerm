@@ -1,7 +1,8 @@
 from typing import Optional
 import numpy as np
 from qiskit.circuit import QuantumCircuit
-import utils
+from . import utils
+from .utils import CircuitData, extract_circuit_data, calculate_trajectory_count
 import emsim as _rust
 
 
@@ -40,7 +41,6 @@ def raw_estimate(
         orb_indices,
         orb_mats,
     ) = circuit_data
-
 
     accuracy_args = (epsilon is not None) and (delta is not None) and (p is not None)
     if (trajectory_count is None) == (not accuracy_args):

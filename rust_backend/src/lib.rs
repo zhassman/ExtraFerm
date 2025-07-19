@@ -92,7 +92,8 @@ fn build_v_matrix(
     for (k, &gt) in gts.iter().enumerate() {
         match gt {
             1 => {
-                let theta = raw[k];
+                // Only access raw[cp_idx] for controlled phase gates
+                let theta = raw[cp_idx];
                 let q1 = qmat[(k, 0)];
                 let q2 = qmat[(k, 1)];
                 let phase = if ((x_mask >> cp_idx) & 1) == 1 {
