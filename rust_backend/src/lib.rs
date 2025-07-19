@@ -152,7 +152,6 @@ fn build_v_matrix(
 
 #[pyfunction]
 fn raw_estimate(
-    py: Python,
     angles: &PyArray1<f64>,
     negative_mask: usize,
     extent: f64,
