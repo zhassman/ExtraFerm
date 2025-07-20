@@ -213,3 +213,26 @@ def test_mean_negative_pi_over_4_six_qubits():
                                                    delta=delta, 
                                                    p=p) for b in bitstrings]
     assert_allclose(probs_compatible_fully_reduced, exact_probs, rtol=0, atol=0.05)
+
+
+def test_mean_0_twelve_qubits():
+    mean, var = 0, .1
+    epsilon, delta, p = .1, .01, 1
+    norb, nelec = 6, (3,3)
+    circuit = make_parameterized_controlled_phase_circuit(norb, nelec, mean, var)
+    bitstrings, exact_probs = get_bitstrings_and_probs(circuit, norb, nelec)
+    
+
+    compatible = ucj_to_compatible(circuit)
+    probs_compatible = [raw_estimate(circuit=compatible,
+                                     outcome_state=b, 
+                                     epsilon=epsilon, delta=delta, p=p) for b in bitstrings[:10]]
+    assert_allclose(probs_compatible, exact_probs[:10], rtol=0, atol=0.05)
+
+    compatible_fully_reduced = ucj_to_compatible_fully_reduced(circuit)
+    probs_compatible_fully_reduced = [raw_estimate(circuit=compatible_fully_reduced, 
+                                                   outcome_state=b, 
+                                                   epsilon=epsilon, 
+                                                   delta=delta, 
+                                                   p=p) for b in bitstrings[:10]]
+    assert_allclose(probs_compatible_fully_reduced, exact_probs[:10], rtol=0, atol=0.05)
