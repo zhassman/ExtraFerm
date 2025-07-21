@@ -62,7 +62,7 @@ def raw_estimate(
     # print("  trajectory_count:", t,                "  bit_length:", t.bit_length())
 
 
-    return _rust.raw_estimate(
+    return _rust.raw_estimate_single(
         num_qubits,
         normalized_angles,
         negative_mask,
