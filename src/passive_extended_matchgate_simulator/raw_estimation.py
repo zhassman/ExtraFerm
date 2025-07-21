@@ -31,6 +31,7 @@ def raw_estimate(
         circuit_data = extract_circuit_data(circuit)
 
     (
+        num_qubits,
         extent,
         negative_mask,
         normalized_angles,
@@ -53,7 +54,16 @@ def raw_estimate(
     else:
         t = calculate_trajectory_count(epsilon, delta, extent, p)
 
+
+    # # in raw_estimation.py, just above the Rust call:
+    # print("  negative_mask:", negative_mask, "  bit_length:", negative_mask.bit_length())
+    # print("  initial_state:",    initial_state,    "  bit_length:", initial_state.bit_length())
+    # print("  outcome_state:",    outcome_state,    "  bit_length:", outcome_state.bit_length())
+    # print("  trajectory_count:", t,                "  bit_length:", t.bit_length())
+
+
     return _rust.raw_estimate(
+        num_qubits,
         normalized_angles,
         negative_mask,
         extent,

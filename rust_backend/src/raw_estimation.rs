@@ -16,8 +16,8 @@ use std::f64::consts::PI;
 /// its determinant (or 0 if something goes wrong).
 fn calculate_expectation_direct<S>(
     v: &ArrayBase<S, Ix2>,
-    in_state: usize,
-    out_state: usize,
+    in_state: u128,
+    out_state: u128,
 ) -> Complex64
 where
     S: Data<Elem = Complex64>,
@@ -76,16 +76,16 @@ where
 /// This is marked inline(always) so LLVM will fuse it into the hot loop.
 #[inline(always)]
 fn build_v_matrix(
-    nqubits: usize,
+    num_qubits: usize,
     raw: &[f64],
-    x_mask: usize,
+    x_mask: u128,
     gts: &[u8],
     pmat: &Array2<f64>,
     qmat: &Array2<usize>,
     orb_idx: &[i64],
     orb_mats: &Array3<Complex64>,
 ) -> Array2<Complex64> {
-    let mut v = Array2::<Complex64>::eye(nqubits);
+    let mut v = Array2::<Complex64>::eye(num_qubits);
     let mut cp_idx = 0;
 
     for (k, &gt) in gts.iter().enumerate() {
@@ -100,7 +100,7 @@ fn build_v_matrix(
                 } else {
                     Complex64::from_polar(1.0, theta * 0.5)
                 };
-                for j in 0..nqubits {
+                for j in 0..num_qubits {
                     v[(q1, j)] *= phase;
                     v[(q2, j)] *= phase;
                 }
@@ -113,19 +113,19 @@ fn build_v_matrix(
                 let q2 = qmat[(k, 1)];
 
                 let ph = Complex64::from_polar(1.0, beta + PI / 2.0);
-                for j in 0..nqubits {
+                for j in 0..num_qubits {
                     v[(q1, j)] *= ph;
                 }
                 let c = (theta / 2.0).cos();
                 let s = (theta / 2.0).sin();
-                for j in 0..nqubits {
+                for j in 0..num_qubits {
                     let a = v[(q1, j)];
                     let b = v[(q2, j)];
                     v[(q1, j)] = Complex64::new(c, 0.0) * a + Complex64::new(s, 0.0) * b;
                     v[(q2, j)] = Complex64::new(-s, 0.0) * a + Complex64::new(c, 0.0) * b;
                 }
                 let iph = Complex64::from_polar(1.0, -beta - PI / 2.0);
-                for j in 0..nqubits {
+                for j in 0..num_qubits {
                     v[(q1, j)] *= iph;
                 }
             }
@@ -133,7 +133,7 @@ fn build_v_matrix(
                 let theta = pmat[(k, 0)];
                 let q1 = qmat[(k, 0)];
                 let phase = Complex64::from_polar(1.0, theta);
-                for j in 0..nqubits {
+                for j in 0..num_qubits {
                     v[(q1, j)] *= phase;
                 }
             }
@@ -152,11 +152,12 @@ fn build_v_matrix(
 
 #[pyfunction]
 pub fn raw_estimate(
+    num_qubits: usize,
     angles: &PyArray1<f64>,
-    negative_mask: usize,
+    negative_mask: u128,
     extent: f64,
-    in_state: usize,
-    out_state: usize,
+    in_state: u128,
+    out_state: u128,
     trajectory_count: usize,
     gate_types: &PyArray1<u8>,
     params: &PyArray2<f64>,
@@ -183,9 +184,6 @@ pub fn raw_estimate(
         })
         .unzip();
 
-    let max_q = qmat.iter().cloned().max().unwrap_or(0);
-    let nqubits = max_q + 1;
-
     let sum_alpha: Complex64 = (0..trajectory_count)
         .into_par_iter()
         .map(|_| {
@@ -198,7 +196,7 @@ pub fn raw_estimate(
             }
 
             let v_mat = build_v_matrix(
-                nqubits,
+                num_qubits,
                 raw,
                 x_mask,
                 gts,

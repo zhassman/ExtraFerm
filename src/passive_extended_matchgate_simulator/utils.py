@@ -17,6 +17,7 @@ CircuitData = Tuple[
     np.ndarray,              # qubits,     shape (N,2)
     np.ndarray,              # orb_indices,shape (N,)
     np.ndarray,              # orb_mats,   shape (M,D,D)
+    int,                     # num_qubits
 ]
 
 
@@ -63,6 +64,7 @@ def extract_circuit_data(
             Stack of M full block-diagonal JW rotation matrices,
             each of dimension DxD (where D = A.shape[0] + B.shape[0]).
     """
+    num_qubits = circuit.num_qubits
     controlled_phase_angles = []
     initial_state = 0
     seen_non_x   = False
@@ -144,6 +146,7 @@ def extract_circuit_data(
     extent = calculate_extent(normalized_angles)
 
     return (
+        num_qubits,
         extent,
         negative_mask,
         np.array(normalized_angles, dtype=np.float64),
@@ -282,7 +285,8 @@ def make_parameterized_controlled_phase_circuit(
         norb: int, 
         nelec: tuple[int, int],
         mean: float, 
-        var: float
+        var: float,
+        reduced_interaction: bool=False
 ) -> QuantumCircuit:
     """
     Crates a circuit consisting an orbital rotation followed by a number of 
@@ -294,8 +298,14 @@ def make_parameterized_controlled_phase_circuit(
     var: specifies the variance of the angles of the controlled-phase gates
     """
     
-    alpha_alpha_indices = [(p, p + 1) for p in range(norb - 1)]
-    alpha_beta_indices = [(p, p) for p in range(norb)]
+    if reduced_interaction:
+        alpha_alpha_indices = [(p, p + 1) for p in range(0, norb - 1, 4)]
+        alpha_beta_indices = [(p, p) for p in range(0, norb, 4)]
+    else:
+        alpha_alpha_indices = [(p, p + 1) for p in range(norb - 1)]
+        alpha_beta_indices = [(p, p) for p in range(norb)]
+        
+        
     qubits = QuantumRegister(2 * norb)
     circuit = QuantumCircuit(qubits)
     scale = math.sqrt(var)
