@@ -1,13 +1,14 @@
 from scipy.linalg import block_diag
 import numpy as np
 import math
-from typing import Tuple
+from typing import Tuple, Optional
 from numpy.typing import NDArray
 from qiskit.circuit import QuantumCircuit, QuantumRegister
 import ffsim
 
 
 CircuitData = Tuple[
+    int,                     # num_qubits
     float,                   # extent
     int,                     # negative_mask
     np.ndarray,              # normalized_angles, shape (C,)
@@ -17,7 +18,6 @@ CircuitData = Tuple[
     np.ndarray,              # qubits,     shape (N,2)
     np.ndarray,              # orb_indices,shape (N,)
     np.ndarray,              # orb_mats,   shape (M,D,D)
-    int,                     # num_qubits
 ]
 
 
@@ -28,6 +28,10 @@ def extract_circuit_data(
     Retrieves all the data needed for the Rust backend in one pass.
 
     Returns:
+
+        num_qubits (int)
+            the number of qubits in the circuit
+
         extent (float)
             the extent of the circuit
         
@@ -286,7 +290,8 @@ def make_parameterized_controlled_phase_circuit(
         nelec: tuple[int, int],
         mean: float, 
         var: float,
-        reduced_interaction: bool=False
+        reduced_interaction: bool=False,
+        seed: Optional[int] = None
 ) -> QuantumCircuit:
     """
     Crates a circuit consisting an orbital rotation followed by a number of 
@@ -314,7 +319,8 @@ def make_parameterized_controlled_phase_circuit(
                                                     with_final_orbital_rotation=False,
                                                     diag_coulomb_mean=mean, 
                                                     diag_coulomb_scale=scale, 
-                                                    diag_coulomb_normal=True)
+                                                    diag_coulomb_normal=True,
+                                                    seed=seed)
     circuit.append(ffsim.qiskit.PrepareHartreeFockJW(norb, nelec), qubits)
     circuit.append(ffsim.qiskit.UCJOpSpinBalancedJW(ucj_op), qubits)
 

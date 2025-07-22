@@ -5,9 +5,11 @@ use pyo3::prelude::*;
 use pyo3::wrap_pyfunction;
 
 use crate::raw_estimation::raw_estimate_single;
+use crate::raw_estimation::raw_estimate_batch;
 
 #[pymodule]
 fn emsim(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(raw_estimate_single, m)?)?;
+    m.add_function(wrap_pyfunction!(raw_estimate_batch, m)?)?;
     Ok(())
 }

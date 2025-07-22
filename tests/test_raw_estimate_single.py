@@ -221,21 +221,23 @@ def test_mean_0_twelve_qubits():
     norb, nelec = 6, (3,3)
     circuit = make_parameterized_controlled_phase_circuit(norb, nelec, mean, var)
     bitstrings, exact_probs = get_bitstrings_and_probs(circuit, norb, nelec)
+    first_10_bitstrings = bitstrings[:10]
+    first_10_exact_probabilities = exact_probs[:10]
     
 
     compatible = ucj_to_compatible(circuit)
     probs_compatible = [raw_estimate(circuit=compatible,
                                      outcome_state=b, 
-                                     epsilon=epsilon, delta=delta, p=p) for b in bitstrings[:10]]
-    assert_allclose(probs_compatible, exact_probs[:10], rtol=0, atol=0.05)
+                                     epsilon=epsilon, delta=delta, p=p) for b in first_10_bitstrings]
+    assert_allclose(probs_compatible, first_10_exact_probabilities, rtol=0, atol=0.05)
 
     compatible_fully_reduced = ucj_to_compatible_fully_reduced(circuit)
     probs_compatible_fully_reduced = [raw_estimate(circuit=compatible_fully_reduced, 
                                                    outcome_state=b, 
                                                    epsilon=epsilon, 
                                                    delta=delta, 
-                                                   p=p) for b in bitstrings[:10]]
-    assert_allclose(probs_compatible_fully_reduced, exact_probs[:10], rtol=0, atol=0.05)
+                                                   p=p) for b in first_10_bitstrings]
+    assert_allclose(probs_compatible_fully_reduced, first_10_exact_probabilities, rtol=0, atol=0.05)
 
 
 def test_126_qubit_circuit():
@@ -245,13 +247,13 @@ def test_126_qubit_circuit():
     circuit = make_parameterized_controlled_phase_circuit(norb, nelec, mean, var, reduced_interaction=True)
     bitstrings, exact_probs = get_bitstrings_and_probs(circuit, norb, nelec)
     first_5_bitstrings = bitstrings[:5]
-    first_5_probabilities = exact_probs[:5]
+    first_5_exact_probabilities = exact_probs[:5]
 
     compatible = ucj_to_compatible(circuit)
     probs_compatible = [raw_estimate(circuit=compatible,
                                     outcome_state=b, 
                                     epsilon=epsilon, delta=delta, p=p) for b in first_5_bitstrings]
-    assert_allclose(probs_compatible, first_5_probabilities, rtol=0, atol=0.05)
+    assert_allclose(probs_compatible, first_5_exact_probabilities, rtol=0, atol=0.05)
 
     compatible_fully_reduced = ucj_to_compatible_fully_reduced(circuit)
     probs_compatible_fully_reduced = [raw_estimate(circuit=compatible_fully_reduced, 
@@ -259,4 +261,4 @@ def test_126_qubit_circuit():
                                                 epsilon=epsilon, 
                                                 delta=delta, 
                                                 p=p) for b in first_5_bitstrings]
-    assert_allclose(probs_compatible_fully_reduced, first_5_probabilities, rtol=0, atol=0.05)
+    assert_allclose(probs_compatible_fully_reduced, first_5_exact_probabilities, rtol=0, atol=0.05)

@@ -132,3 +132,59 @@ pub fn raw_estimate_single(
 
     Ok(result)
 }
+
+
+#[pyfunction(allow_threads)]
+pub fn raw_estimate_batch(
+    py: Python,
+    num_qubits: usize,
+    angles: &PyArray1<f64>,
+    negative_mask: u128,
+    extent: f64,
+    in_state: u128,
+    out_states: &PyAny,  // any Python iterable of ints
+    trajectory_count: usize,
+    gate_types: &PyArray1<u8>,
+    params: &PyArray2<f64>,
+    qubits: &PyArray2<usize>,
+    orb_indices: &PyArray1<i64>,
+    orb_mats: &PyArray3<Complex64>,
+) -> PyResult<Py<PyArray1<f64>>> {
+    // extract core arrays
+    let raw: &[f64] = unsafe { angles.as_slice()? };
+    let gts: &[u8] = unsafe { gate_types.as_slice()? };
+    let pmat = unsafe { params.as_array().to_owned() };
+    let qmat = unsafe { qubits.as_array().to_owned() };
+    let orb_idx: &[i64] = unsafe { orb_indices.as_slice()? };
+    let orb_mats_arr = unsafe { orb_mats.as_array().to_owned() };
+
+    // extract out_states into Vec<u128>
+    let outs: Vec<u128> = out_states.extract()?;
+
+    // parallel compute
+    let results: Vec<f64> = outs
+        .into_par_iter()
+        .map(|out_state| {
+            if in_state.count_ones() != out_state.count_ones() {
+                0.0
+            } else {
+                raw_estimate_internal(
+                    num_qubits,
+                    raw,
+                    negative_mask,
+                    extent,
+                    in_state,
+                    out_state,
+                    trajectory_count,
+                    gts,
+                    &pmat,
+                    &qmat,
+                    orb_idx,
+                    &orb_mats_arr,
+                )
+            }
+        })
+        .collect();
+
+    Ok(PyArray1::from_vec(py, results).to_owned())
+}
