@@ -10,7 +10,7 @@ use std::f64::consts::PI;
 /// `out_state`, build the submatrix (rows where out_state has a 1, and
 /// columns where in_state has a 1 if n=m, else *all* columns), then return
 /// its determinant (or 0 if something goes wrong).
-pub fn calculate_expectation_direct<S>(
+pub fn calculate_expectation<S>(
     v: &ArrayBase<S, Ix2>,
     in_state: u128,
     out_state: u128,

@@ -1,7 +1,6 @@
 from typing import Optional, Union, Sequence
 import numpy as np
 from qiskit.circuit import QuantumCircuit
-from . import utils
 from .utils import CircuitData, extract_circuit_data, calculate_trajectory_count
 import emsim as _rust
 

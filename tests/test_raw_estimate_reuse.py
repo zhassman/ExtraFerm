@@ -1,5 +1,4 @@
 import math
-import numpy as np
 from numpy.testing import assert_allclose
 from passive_extended_matchgate_simulator.raw_estimation import raw_estimate
 from passive_extended_matchgate_simulator.utils import (ucj_to_compatible, 

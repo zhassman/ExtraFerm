@@ -6,7 +6,7 @@ use rayon::prelude::*;
 use ndarray::{Array2, Array3};
 
 use crate::core::build_v_matrix;
-use crate::core::calculate_expectation_direct;
+use crate::core::calculate_expectation;
 
 
 /// Internal function performing the full Monte Carlo logic.
@@ -59,7 +59,7 @@ pub fn raw_estimate_internal(
             );
 
             // Compute the amplitude for this bitstring
-            let amp = calculate_expectation_direct(&v_mat, in_state, out_state);
+            let amp = calculate_expectation(&v_mat, in_state, out_state);
 
             // Phase and sign corrections
             let j_phase = match x_mask.count_ones() % 4 {
@@ -247,7 +247,7 @@ pub fn raw_estimate_reuse(
                     if in_state.count_ones() != out_state.count_ones() {
                         Complex64::new(0.0, 0.0)
                     } else {
-                        let amp = calculate_expectation_direct(&v_mat, in_state, out_state);
+                        let amp = calculate_expectation(&v_mat, in_state, out_state);
                         let j_phase = match x_mask.count_ones() % 4 {
                             0 => Complex64::new(1.0, 0.0),
                             1 => Complex64::new(0.0, 1.0),
