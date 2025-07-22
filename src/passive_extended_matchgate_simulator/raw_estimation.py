@@ -15,6 +15,7 @@ def raw_estimate(
     epsilon: Optional[float] = None,
     delta:   Optional[float] = None,
     p:       Optional[float] = None,
+    reuse_trajectories: Optional[bool] = False
 ) -> Union[float, np.ndarray]:
     """
     Monte-Carlo estimate for one or more outcome_state(s). Pass:
@@ -24,8 +25,15 @@ def raw_estimate(
     If 'trajectory_count' is provided, it is used directly.
     Otherwise it's computed from (epsilon,delta,p,extent).
 
+    If reuse_trajectories is set to True, then the Rust backend will
+    use the same pool of trajectories to calculate probabilities for
+    all bitstrings.
+
     Returns a float for a single state, or an ndarray for multiple.
     """
+    if reuse_trajectories and isinstance(outcome_state, int):
+        raise ValueError("'reuse_trajectories=True' only makes sense when 'outcome_state' is a sequence")
+
 
     # 1) load or extract your circuit_data
     if (circuit is None) == (circuit_data is None):
@@ -74,17 +82,36 @@ def raw_estimate(
     else:
         # batch path: any sequence of Python ints (up to 128 bits)
         # we pass the Python iterable directly; Rust will extract u128
-        return _rust.raw_estimate_batch(
-            num_qubits,
-            normalized_angles,
-            negative_mask,
-            extent,
-            initial_state,
-            outcome_state,   # sequence of Python ints → Rust Vec<u128>
-            t,
-            gate_types,
-            params,
-            qubits,
-            orb_indices,
-            orb_mats,
-        )
+
+        if reuse_trajectories:
+            return _rust.raw_estimate_reuse(
+                num_qubits,
+                normalized_angles,
+                negative_mask,
+                extent,
+                initial_state,
+                outcome_state,
+                t,
+                gate_types,
+                params,
+                qubits,
+                orb_indices,
+                orb_mats,
+            )
+
+        else:
+
+            return _rust.raw_estimate_batch(
+                num_qubits,
+                normalized_angles,
+                negative_mask,
+                extent,
+                initial_state,
+                outcome_state,   # sequence of Python ints → Rust Vec<u128>
+                t,
+                gate_types,
+                params,
+                qubits,
+                orb_indices,
+                orb_mats,
+            )
