@@ -9,7 +9,7 @@ def raw_estimate(
     *,
     circuit: Optional[QuantumCircuit]   = None,
     circuit_data: Optional[CircuitData] = None,
-    outcome_state: Union[int, Sequence[int]],
+    outcome_states: Union[int, Sequence[int]],
     trajectory_count: Optional[int] = None,
     epsilon: Optional[float] = None,
     delta:   Optional[float] = None,
@@ -17,7 +17,7 @@ def raw_estimate(
     reuse_trajectories: Optional[bool] = False
 ) -> Union[float, np.ndarray]:
     """
-    Monte-Carlo estimate for one or more outcome_state(s). Pass:
+    Monte-Carlo estimate for one or more outcome_states(s). Pass:
       - exactly one of circuit or circuit_data, and
       - exactly one of (trajectory_count) or (epsilon,delta,p).
 
@@ -30,13 +30,12 @@ def raw_estimate(
 
     Returns a float for a single state, or an ndarray for multiple.
     """
-    if reuse_trajectories and isinstance(outcome_state, int):
-        raise ValueError("'reuse_trajectories=True' only makes sense when 'outcome_state' is a sequence")
+    if reuse_trajectories and isinstance(outcome_states, int):
+        raise ValueError("'reuse_trajectories=True' only makes sense when 'outcome_states' is a sequence")
 
-
-    # 1) load or extract your circuit_data
     if (circuit is None) == (circuit_data is None):
         raise ValueError("Must pass exactly one of 'circuit' or 'circuit_data'")
+
     if circuit_data is None:
         circuit_data = extract_circuit_data(circuit)
 
@@ -53,7 +52,6 @@ def raw_estimate(
         orb_mats,
     ) = circuit_data
 
-    # 2) trajectory count vs (epsilon,delta,p)
     accuracy_args = (epsilon is not None) and (delta is not None) and (p is not None)
     if (trajectory_count is None) == (not accuracy_args):
         raise ValueError(
@@ -61,16 +59,15 @@ def raw_estimate(
         )
     t = trajectory_count if (trajectory_count is not None) else calculate_trajectory_count(epsilon, delta, extent, p)
 
-    # 3) dispatch to Rust
-    if isinstance(outcome_state, int):
-        # single-state path
+    if isinstance(outcome_states, int):
+
         return _rust.raw_estimate_single(
             num_qubits,
             normalized_angles,
             negative_mask,
             extent,
             initial_state,
-            outcome_state,   # a single Python int → Rust u128
+            outcome_states,
             t,
             gate_types,
             params,
@@ -79,8 +76,6 @@ def raw_estimate(
             orb_mats,
         )
     else:
-        # batch path: any sequence of Python ints (up to 128 bits)
-        # we pass the Python iterable directly; Rust will extract u128
 
         if reuse_trajectories:
             return _rust.raw_estimate_reuse(
@@ -89,7 +84,7 @@ def raw_estimate(
                 negative_mask,
                 extent,
                 initial_state,
-                outcome_state,
+                outcome_states,
                 t,
                 gate_types,
                 params,
@@ -106,7 +101,7 @@ def raw_estimate(
                 negative_mask,
                 extent,
                 initial_state,
-                outcome_state,   # sequence of Python ints → Rust Vec<u128>
+                outcome_states,
                 t,
                 gate_types,
                 params,

@@ -20,9 +20,9 @@ def exact_calculation(
         - float if a single int is passed,
         - numpy.ndarray of floats if a sequence is passed.
     """
-    # Validate inputs
     if (circuit is None) == (circuit_data is None):
         raise ValueError("Must pass exactly one of 'circuit' or 'circuit_data'")
+    
     if circuit_data is None:
         circuit_data = extract_circuit_data(circuit)
 
@@ -39,7 +39,6 @@ def exact_calculation(
         orb_mats,
     ) = circuit_data
 
-    # Prepare list of output states
     if isinstance(outcome_states, int):
         out_list = [outcome_states]
         single = True
@@ -47,7 +46,6 @@ def exact_calculation(
         out_list = list(outcome_states)
         single = False
 
-    # Call into Rust
     result_array = _rust.exact_calculation(
         num_qubits,
         normalized_angles,
@@ -60,7 +58,6 @@ def exact_calculation(
         orb_mats,
     )
 
-    # Convert result and unwrap if single
     result = np.asarray(result_array)
     if single:
         return float(result[0])

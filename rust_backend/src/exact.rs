@@ -10,16 +10,16 @@ use crate::core::{build_v_matrix, calculate_expectation};
 pub fn exact_calculation(
     py: Python,
     num_qubits: usize,
-    angles: &PyArray1<f64>,    // controlled-phase angles
-    in_state: u128,
-    out_states: &PyAny,         // Python iterable of ints
+    angles: &PyArray1<f64>,
+    initial_state: u128,
+    outcome_states: &PyAny,
     gate_types: &PyArray1<u8>,
     params: &PyArray2<f64>,
     qubits: &PyArray2<usize>,
     orb_indices: &PyArray1<i64>,
     orb_mats: &PyArray3<Complex64>,
 ) -> PyResult<Py<PyArray1<f64>>> {
-    // Extract Rust-native data
+
     let raw: &[f64]       = unsafe { angles.as_slice()? };
     let gts: &[u8]        = unsafe { gate_types.as_slice()? };
     let pmat              = unsafe { params.as_array().to_owned() };
@@ -27,13 +27,11 @@ pub fn exact_calculation(
     let orb_idx: &[i64]   = unsafe { orb_indices.as_slice()? };
     let orb_mats_arr      = unsafe { orb_mats.as_array().to_owned() };
 
-    // Collect output states and prepare result buffer
-    let outs: Vec<u128>   = out_states.extract()?;
+    let outs: Vec<u128>   = outcome_states.extract()?;
     let n_out = outs.len();
     let mut probabilities = vec![0.0f64; n_out];
 
-    // Pre-filter valid outputs by Hamming weight
-    let in_hw = in_state.count_ones();
+    let in_hw = initial_state.count_ones();
     let valid: Vec<(usize,u128)> = outs.iter()
         .enumerate()
         .filter(|&(_i,&o)| o.count_ones() == in_hw)
@@ -42,11 +40,11 @@ pub fn exact_calculation(
 
     if !valid.is_empty() {
         let num_mask = 1 << raw.len();
-        // Sum contributions in parallel
+
         let accum: Vec<Complex64> = (0..num_mask)
             .into_par_iter()
             .map(|mask| {
-                // compute weight & phase
+
                 let mut weight = 1.0;
                 let mut coeff = Complex64::new(1.0, 0.0);
                 for (j,&theta) in raw.iter().enumerate() {
@@ -58,14 +56,14 @@ pub fn exact_calculation(
                         weight *= t.cos();
                     }
                 }
-                // build V matrix
+
                 let v = build_v_matrix(
                     num_qubits, raw, mask as u128,
                     gts, &pmat, &qmat, orb_idx, &orb_mats_arr
                 );
-                // compute contributions for each valid out
+
                 valid.iter()
-                    .map(|&(_i,out)| coeff * calculate_expectation(&v, in_state, out) * weight)
+                    .map(|&(_i,out)| coeff * calculate_expectation(&v, initial_state, out) * weight)
                     .collect::<Vec<_>>()
             })
             .reduce(
@@ -75,7 +73,7 @@ pub fn exact_calculation(
                     acc
                 }
             );
-        // finalize probabilities
+
         for ((idx,_), alpha) in valid.into_iter().zip(accum) {
             probabilities[idx] = alpha.norm_sqr();
         }

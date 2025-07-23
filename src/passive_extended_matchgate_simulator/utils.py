@@ -8,16 +8,16 @@ import ffsim
 
 
 CircuitData = Tuple[
-    int,                     # num_qubits
-    float,                   # extent
-    int,                     # negative_mask
-    np.ndarray,              # normalized_angles, shape (C,)
-    int,                     # initial_state
-    np.ndarray,              # gate_types, shape (N,)
-    np.ndarray,              # params,     shape (N,2)
-    np.ndarray,              # qubits,     shape (N,2)
-    np.ndarray,              # orb_indices,shape (N,)
-    np.ndarray,              # orb_mats,   shape (M,D,D)
+    int,
+    float,
+    int,
+    np.ndarray,
+    int,
+    np.ndarray,
+    np.ndarray,
+    np.ndarray,
+    np.ndarray,
+    np.ndarray,
 ]
 
 

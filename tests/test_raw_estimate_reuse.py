@@ -17,14 +17,14 @@ def test_mean_0_six_qubits():
 
     compatible = ucj_to_compatible(circuit)
     probs_compatible = raw_estimate(circuit=compatible,
-                                     outcome_state=bitstrings, 
+                                     outcome_states=bitstrings, 
                                      epsilon=epsilon, delta=delta, p=p,
                                      reuse_trajectories=True)
     assert_allclose(probs_compatible, exact_probs, rtol=0, atol=0.05)
 
     compatible_fully_reduced = ucj_to_compatible_fully_reduced(circuit)
     probs_compatible_fully_reduced = raw_estimate(circuit=compatible_fully_reduced, 
-                                                   outcome_state=bitstrings, 
+                                                   outcome_states=bitstrings, 
                                                    epsilon=epsilon, 
                                                    delta=delta, 
                                                    p=p,
@@ -42,14 +42,14 @@ def test_mean_pi_over_4_six_qubits():
 
     compatible = ucj_to_compatible(circuit)
     probs_compatible = raw_estimate(circuit=compatible,
-                                     outcome_state=bitstrings, 
+                                     outcome_states=bitstrings, 
                                      epsilon=epsilon, delta=delta, p=p,
                                      reuse_trajectories=True)
     assert_allclose(probs_compatible, exact_probs, rtol=0, atol=0.05)
 
     compatible_fully_reduced = ucj_to_compatible_fully_reduced(circuit)
     probs_compatible_fully_reduced = raw_estimate(circuit=compatible_fully_reduced, 
-                                                   outcome_state=bitstrings, 
+                                                   outcome_states=bitstrings, 
                                                    epsilon=epsilon, 
                                                    delta=delta, 
                                                    p=p,
@@ -67,14 +67,14 @@ def test_mean_pi_over_2_six_qubits():
 
     compatible = ucj_to_compatible(circuit)
     probs_compatible = raw_estimate(circuit=compatible,
-                                     outcome_state=bitstrings, 
+                                     outcome_states=bitstrings, 
                                      epsilon=epsilon, delta=delta, p=p,
                                      reuse_trajectories=True)
     assert_allclose(probs_compatible, exact_probs, rtol=0, atol=0.05)
 
     compatible_fully_reduced = ucj_to_compatible_fully_reduced(circuit)
     probs_compatible_fully_reduced = raw_estimate(circuit=compatible_fully_reduced, 
-                                                   outcome_state=bitstrings, 
+                                                   outcome_states=bitstrings, 
                                                    epsilon=epsilon, 
                                                    delta=delta, 
                                                    p=p,
@@ -92,14 +92,14 @@ def test_mean_3pi_over_4_six_qubits():
 
     compatible = ucj_to_compatible(circuit)
     probs_compatible = raw_estimate(circuit=compatible,
-                                     outcome_state=bitstrings, 
+                                     outcome_states=bitstrings, 
                                      epsilon=epsilon, delta=delta, p=p,
                                      reuse_trajectories=True)
     assert_allclose(probs_compatible, exact_probs, rtol=0, atol=0.05)
 
     compatible_fully_reduced = ucj_to_compatible_fully_reduced(circuit)
     probs_compatible_fully_reduced = raw_estimate(circuit=compatible_fully_reduced, 
-                                                   outcome_state=bitstrings, 
+                                                   outcome_states=bitstrings, 
                                                    epsilon=epsilon, 
                                                    delta=delta, 
                                                    p=p,
@@ -117,14 +117,14 @@ def test_mean_pi_six_qubits():
 
     compatible = ucj_to_compatible(circuit)
     probs_compatible = raw_estimate(circuit=compatible,
-                                     outcome_state=bitstrings, 
+                                     outcome_states=bitstrings, 
                                      epsilon=epsilon, delta=delta, p=p,
                                      reuse_trajectories=True)
     assert_allclose(probs_compatible, exact_probs, rtol=0, atol=0.05)
 
     compatible_fully_reduced = ucj_to_compatible_fully_reduced(circuit)
     probs_compatible_fully_reduced = raw_estimate(circuit=compatible_fully_reduced, 
-                                                   outcome_state=bitstrings, 
+                                                   outcome_states=bitstrings, 
                                                    epsilon=epsilon, 
                                                    delta=delta, 
                                                    p=p,
@@ -142,14 +142,14 @@ def test_mean_negative_pi_six_qubits():
 
     compatible = ucj_to_compatible(circuit)
     probs_compatible = raw_estimate(circuit=compatible,
-                                     outcome_state=bitstrings, 
+                                     outcome_states=bitstrings, 
                                      epsilon=epsilon, delta=delta, p=p,
                                      reuse_trajectories=True)
     assert_allclose(probs_compatible, exact_probs, rtol=0, atol=0.05)
 
     compatible_fully_reduced = ucj_to_compatible_fully_reduced(circuit)
     probs_compatible_fully_reduced = raw_estimate(circuit=compatible_fully_reduced, 
-                                                   outcome_state=bitstrings, 
+                                                   outcome_states=bitstrings, 
                                                    epsilon=epsilon, 
                                                    delta=delta, 
                                                    p=p,
@@ -167,14 +167,14 @@ def test_mean_negative_3pi_over_4_six_qubits():
 
     compatible = ucj_to_compatible(circuit)
     probs_compatible = raw_estimate(circuit=compatible,
-                                     outcome_state=bitstrings, 
+                                     outcome_states=bitstrings, 
                                      epsilon=epsilon, delta=delta, p=p,
                                      reuse_trajectories=True)
     assert_allclose(probs_compatible, exact_probs, rtol=0, atol=0.05)
 
     compatible_fully_reduced = ucj_to_compatible_fully_reduced(circuit)
     probs_compatible_fully_reduced = raw_estimate(circuit=compatible_fully_reduced, 
-                                                   outcome_state=bitstrings, 
+                                                   outcome_states=bitstrings, 
                                                    epsilon=epsilon, 
                                                    delta=delta, 
                                                    p=p,
@@ -192,14 +192,14 @@ def test_mean_negative_pi_over_2_six_qubits():
 
     compatible = ucj_to_compatible(circuit)
     probs_compatible = raw_estimate(circuit=compatible,
-                                     outcome_state=bitstrings, 
+                                     outcome_states=bitstrings, 
                                      epsilon=epsilon, delta=delta, p=p,
                                      reuse_trajectories=True)
     assert_allclose(probs_compatible, exact_probs, rtol=0, atol=0.05)
 
     compatible_fully_reduced = ucj_to_compatible_fully_reduced(circuit)
     probs_compatible_fully_reduced = raw_estimate(circuit=compatible_fully_reduced, 
-                                                   outcome_state=bitstrings, 
+                                                   outcome_states=bitstrings, 
                                                    epsilon=epsilon, 
                                                    delta=delta, 
                                                    p=p,
@@ -217,14 +217,14 @@ def test_mean_negative_pi_over_4_six_qubits():
 
     compatible = ucj_to_compatible(circuit)
     probs_compatible = raw_estimate(circuit=compatible,
-                                     outcome_state=bitstrings, 
+                                     outcome_states=bitstrings, 
                                      epsilon=epsilon, delta=delta, p=p,
                                      reuse_trajectories=True)
     assert_allclose(probs_compatible, exact_probs, rtol=0, atol=0.05)
 
     compatible_fully_reduced = ucj_to_compatible_fully_reduced(circuit)
     probs_compatible_fully_reduced = raw_estimate(circuit=compatible_fully_reduced, 
-                                                   outcome_state=bitstrings, 
+                                                   outcome_states=bitstrings, 
                                                    epsilon=epsilon, 
                                                    delta=delta, 
                                                    p=p,
@@ -244,14 +244,14 @@ def test_mean_0_twelve_qubits():
 
     compatible = ucj_to_compatible(circuit)
     probs_compatible = raw_estimate(circuit=compatible,
-                                     outcome_state=first_10_bitstrings, 
+                                     outcome_states=first_10_bitstrings, 
                                      epsilon=epsilon, delta=delta, p=p,
                                      reuse_trajectories=True)
     assert_allclose(probs_compatible, first_10_exact_probabilities, rtol=0, atol=0.05)
 
     compatible_fully_reduced = ucj_to_compatible_fully_reduced(circuit)
     probs_compatible_fully_reduced = raw_estimate(circuit=compatible_fully_reduced, 
-                                                   outcome_state=first_10_bitstrings, 
+                                                   outcome_states=first_10_bitstrings, 
                                                    epsilon=epsilon, 
                                                    delta=delta, 
                                                    p=p,
@@ -270,14 +270,14 @@ def test_126_qubit_circuit():
 
     compatible = ucj_to_compatible(circuit)
     probs_compatible = raw_estimate(circuit=compatible,
-                                    outcome_state=first_5_bitstrings, 
+                                    outcome_states=first_5_bitstrings, 
                                     epsilon=epsilon, delta=delta, p=p,
                                     reuse_trajectories=True)
     assert_allclose(probs_compatible, first_5_exact_probabilities, rtol=0, atol=0.05)
 
     compatible_fully_reduced = ucj_to_compatible_fully_reduced(circuit)
     probs_compatible_fully_reduced = raw_estimate(circuit=compatible_fully_reduced, 
-                                                outcome_state=first_5_bitstrings, 
+                                                outcome_states=first_5_bitstrings, 
                                                 epsilon=epsilon, 
                                                 delta=delta, 
                                                 p=p,
