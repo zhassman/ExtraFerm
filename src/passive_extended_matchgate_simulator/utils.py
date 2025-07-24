@@ -132,7 +132,7 @@ def extract_circuit_data(
 
         else:
             raise ValueError(f"Unexpected gate '{name}' in circuit.")
-    
+
     if orb_mats:
         orb_mats_arr = np.stack(orb_mats, axis=0).astype(np.complex128)
     else:
@@ -286,9 +286,9 @@ def ucj_to_compatible_fully_reduced(
 
 
 def make_parameterized_controlled_phase_circuit(
-        norb: int, 
+        norb: int,
         nelec: tuple[int, int],
-        mean: float, 
+        mean: float,
         var: float,
         reduced_interaction: bool=False,
         seed: Optional[int] = None
@@ -302,23 +302,23 @@ def make_parameterized_controlled_phase_circuit(
     mean: specifies the average angles of the controlled-phase gates
     var: specifies the variance of the angles of the controlled-phase gates
     """
-    
+
     if reduced_interaction:
         alpha_alpha_indices = [(p, p + 1) for p in range(0, norb - 1, 4)]
         alpha_beta_indices = [(p, p) for p in range(0, norb, 4)]
     else:
         alpha_alpha_indices = [(p, p + 1) for p in range(norb - 1)]
         alpha_beta_indices = [(p, p) for p in range(norb)]
-        
-        
+
+
     qubits = QuantumRegister(2 * norb)
     circuit = QuantumCircuit(qubits)
     scale = math.sqrt(var)
-    ucj_op = ffsim.random.random_ucj_op_spin_balanced(norb, 
+    ucj_op = ffsim.random.random_ucj_op_spin_balanced(norb,
                                                     interaction_pairs=(alpha_alpha_indices, alpha_beta_indices),
                                                     with_final_orbital_rotation=False,
-                                                    diag_coulomb_mean=mean, 
-                                                    diag_coulomb_scale=scale, 
+                                                    diag_coulomb_mean=mean,
+                                                    diag_coulomb_scale=scale,
                                                     diag_coulomb_normal=True,
                                                     seed=seed)
     circuit.append(ffsim.qiskit.PrepareHartreeFockJW(norb, nelec), qubits)
@@ -328,8 +328,8 @@ def make_parameterized_controlled_phase_circuit(
 
 
 def get_bitstrings_and_probs(
-        circuit: QuantumCircuit, 
-        norb: int, 
+        circuit: QuantumCircuit,
+        norb: int,
         nelec: tuple[int, int]
 ) -> tuple[list[int], list[np.float64]]:
     """
@@ -342,7 +342,7 @@ def get_bitstrings_and_probs(
         norb: The number of spatial orbitals
         nelec: The number of electrons in spatial orbital
     """
-    
+
     statevec = ffsim.qiskit.final_state_vector(circuit)
     probs = np.abs(statevec.vec)**2
     bitstrings = ffsim.addresses_to_strings(range(len(probs)), norb, nelec)

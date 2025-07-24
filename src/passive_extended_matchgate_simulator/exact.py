@@ -22,7 +22,7 @@ def exact_calculation(
     """
     if (circuit is None) == (circuit_data is None):
         raise ValueError("Must pass exactly one of 'circuit' or 'circuit_data'")
-    
+
     if circuit_data is None:
         circuit_data = extract_circuit_data(circuit)
 
