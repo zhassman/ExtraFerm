@@ -41,6 +41,4 @@ Install our simulator
 git clone https://github.com/zhassman/Passive-Extended-Matchgate-Simulator.git
 cd Passive-Extended-Matchgate-Simulator
 pip install -e .
-cd rust_backend/
-maturin develop --release
 ```
