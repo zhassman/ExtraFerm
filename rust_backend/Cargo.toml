@@ -10,9 +10,7 @@ name = "emsim"
 crate-type = ["cdylib"]
 
 [dependencies]
-# PyO3 ‒ must match your numpy crate version
 pyo3 = { version = "0.17.3", features = ["extension-module"] }
-# rust-numpy ‒ pinned to match PyO3’s ffi
 numpy = "0.17.2"
 ndarray = "0.15.6"
 ndarray-linalg = "0.14.1"
@@ -21,5 +19,4 @@ rand = "0.8.5"
 rayon = "1.8"
 
 [patch.crates-io]
-# ensure exact matching of numpy/PyO3 ffi versions
 numpy = { git = "https://github.com/PyO3/rust-numpy.git", tag = "v0.17.2" }
