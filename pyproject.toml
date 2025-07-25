@@ -1,13 +1,21 @@
 [project]
 name = "passive-extended-matchgate-simulator"
+requires-python = ">=3.8"
 version = "0.1.0"
 description = "Passive extended matchgate quantum circuit simulator"
 readme = "README.md"
-requires-python = ">=3.8"
+license = { file = "LICENSE" }
+
 dependencies = [
-  "numpy>=1.25",
-  "scipy",
-  "qiskit",
+  "numpy>=2.3.2",
+  "scipy>=1.16.0",
+  "qiskit>=2.0.2",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.4.0",
+  "maturin>=1.0",
 ]
 
 [build-system]
