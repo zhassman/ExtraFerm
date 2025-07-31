@@ -1,6 +1,6 @@
 from typing import Optional
 from qiskit.circuit import QuantumCircuit
-import emsim as _rust
+from . import _lib as _rust
 from .utils import extract_circuit_data, CircuitData
 
 def estimate(

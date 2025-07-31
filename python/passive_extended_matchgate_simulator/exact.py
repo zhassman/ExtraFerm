@@ -2,7 +2,7 @@ from typing import Optional, Sequence, Union
 import numpy as np
 from qiskit.circuit import QuantumCircuit
 from .utils import CircuitData, extract_circuit_data
-import emsim as _rust
+from . import _lib as _rust
 
 
 def exact_calculation(
