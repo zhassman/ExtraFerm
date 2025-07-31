@@ -1,23 +1,23 @@
 use pyo3::prelude::*;
-use numpy::{PyArray1, PyArray2, PyArray3};
+use numpy::{PyArray1, PyArray2, PyArray3, PyArrayMethods};
 use num_complex::Complex64;
 use rayon::prelude::*;
 
 use crate::core::{build_v_matrix, calculate_expectation};
 
 
-#[pyfunction(allow_threads)]
+#[pyfunction]
 pub fn exact_calculation(
     py: Python,
     num_qubits: usize,
-    angles: &PyArray1<f64>,
+    angles: &Bound<'_, PyArray1<f64>>,
     initial_state: u128,
-    outcome_states: &PyAny,
-    gate_types: &PyArray1<u8>,
-    params: &PyArray2<f64>,
-    qubits: &PyArray2<usize>,
-    orb_indices: &PyArray1<i64>,
-    orb_mats: &PyArray3<Complex64>,
+    outcome_states: &Bound<'_, PyAny>,
+    gate_types: &Bound<'_, PyArray1<u8>>,
+    params: &Bound<'_, PyArray2<f64>>,
+    qubits: &Bound<'_, PyArray2<usize>>,
+    orb_indices: &Bound<'_, PyArray1<i64>>,
+    orb_mats: &Bound<'_, PyArray3<Complex64>>,
 ) -> PyResult<Py<PyArray1<f64>>> {
 
     let raw: &[f64]       = unsafe { angles.as_slice()? };
@@ -79,5 +79,5 @@ pub fn exact_calculation(
         }
     }
 
-    Ok(PyArray1::from_vec(py, probabilities).to_owned())
+    Ok(PyArray1::from_vec(py, probabilities).to_owned().into())
 }

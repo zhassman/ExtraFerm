@@ -1,5 +1,5 @@
 use pyo3::prelude::*;
-use numpy::{PyArray1, PyArray2, PyArray3};
+use numpy::{PyArray1, PyArray2, PyArray3, PyArrayMethods};
 use num_complex::Complex64;
 use rand::Rng;
 use rayon::prelude::*;
@@ -36,10 +36,10 @@ pub fn raw_estimate_internal(
     let sum_alpha: Complex64 = (0..trajectory_count)
         .into_par_iter()
         .map(|_| {
-            let mut rng = rand::thread_rng();
+            let mut rng = rand::rng();
             let mut x_mask: u128 = 0;
             for i in 0..pre_sin.len() {
-                if rng.gen::<f64>() < pre_sin[i] / (pre_sin[i] + pre_cos[i]) {
+                if rng.random::<f64>() < pre_sin[i] / (pre_sin[i] + pre_cos[i]) {
                     x_mask |= 1 << i;
                 }
             }
@@ -86,23 +86,18 @@ pub fn raw_estimate_internal(
 #[pyfunction]
 pub fn raw_estimate_single(
     num_qubits: usize,
-    angles: &PyArray1<f64>,
+    angles: &Bound<'_, PyArray1<f64>>,
     negative_mask: u128,
     extent: f64,
     initial_state: u128,
     outcome_state: u128,
     trajectory_count: usize,
-    gate_types: &PyArray1<u8>,
-    params: &PyArray2<f64>,
-    qubits: &PyArray2<usize>,
-    orb_indices: &PyArray1<i64>,
-    orb_mats: &PyArray3<Complex64>,
+    gate_types: &Bound<'_, PyArray1<u8>>,
+    params: &Bound<'_, PyArray2<f64>>,
+    qubits: &Bound<'_, PyArray2<usize>>,
+    orb_indices: &Bound<'_, PyArray1<i64>>,
+    orb_mats: &Bound<'_, PyArray3<Complex64>>,
 ) -> PyResult<f64> {
-
-    if initial_state.count_ones() != outcome_state.count_ones() {
-        return Ok(0.0);
-    }
-
     let raw: &[f64] = unsafe { angles.as_slice()? };
     let gts: &[u8] = unsafe { gate_types.as_slice()? };
     let pmat = unsafe { params.as_array().to_owned() };
@@ -110,40 +105,42 @@ pub fn raw_estimate_single(
     let orb_idx: &[i64] = unsafe { orb_indices.as_slice()? };
     let orb_mats_arr = unsafe { orb_mats.as_array().to_owned() };
 
-    let result = raw_estimate_internal(
-        num_qubits,
-        raw,
-        negative_mask,
-        extent,
-        initial_state,
-        outcome_state,
-        trajectory_count,
-        gts,
-        &pmat,
-        &qmat,
-        orb_idx,
-        &orb_mats_arr,
-    );
-
-    Ok(result)
+    if initial_state.count_ones() != outcome_state.count_ones() {
+        Ok(0.0)
+    } else {
+        Ok(raw_estimate_internal(
+            num_qubits,
+            raw,
+            negative_mask,
+            extent,
+            initial_state,
+            outcome_state,
+            trajectory_count,
+            gts,
+            &pmat,
+            &qmat,
+            orb_idx,
+            &orb_mats_arr,
+        ))
+    }
 }
 
 
-#[pyfunction(allow_threads)]
+#[pyfunction]
 pub fn raw_estimate_batch(
     py: Python,
     num_qubits: usize,
-    angles: &PyArray1<f64>,
+    angles: &Bound<'_, PyArray1<f64>>,
     negative_mask: u128,
     extent: f64,
     initial_state: u128,
-    outcome_states: &PyAny,
+    outcome_states: &Bound<'_, PyAny>,
     trajectory_count: usize,
-    gate_types: &PyArray1<u8>,
-    params: &PyArray2<f64>,
-    qubits: &PyArray2<usize>,
-    orb_indices: &PyArray1<i64>,
-    orb_mats: &PyArray3<Complex64>,
+    gate_types: &Bound<'_, PyArray1<u8>>,
+    params: &Bound<'_, PyArray2<f64>>,
+    qubits: &Bound<'_, PyArray2<usize>>,
+    orb_indices: &Bound<'_, PyArray1<i64>>,
+    orb_mats: &Bound<'_, PyArray3<Complex64>>,
 ) -> PyResult<Py<PyArray1<f64>>> {
 
     let raw: &[f64] = unsafe { angles.as_slice()? };
@@ -179,25 +176,25 @@ pub fn raw_estimate_batch(
         })
         .collect();
 
-    Ok(PyArray1::from_vec(py, results).to_owned())
+    Ok(PyArray1::from_vec(py, results).to_owned().into())
 }
 
 
-#[pyfunction(allow_threads)]
+#[pyfunction]
 pub fn raw_estimate_reuse(
     py: Python,
     num_qubits: usize,
-    angles: &PyArray1<f64>,
+    angles: &Bound<'_, PyArray1<f64>>,
     negative_mask: u128,
     extent: f64,
     initial_state: u128,
-    outcome_states: &PyAny,
+    outcome_states: &Bound<'_, PyAny>,
     trajectory_count: usize,
-    gate_types: &PyArray1<u8>,
-    params: &PyArray2<f64>,
-    qubits: &PyArray2<usize>,
-    orb_indices: &PyArray1<i64>,
-    orb_mats: &PyArray3<Complex64>,
+    gate_types: &Bound<'_, PyArray1<u8>>,
+    params: &Bound<'_, PyArray2<f64>>,
+    qubits: &Bound<'_, PyArray2<usize>>,
+    orb_indices: &Bound<'_, PyArray1<i64>>,
+    orb_mats: &Bound<'_, PyArray3<Complex64>>,
 ) -> PyResult<Py<PyArray1<f64>>> {
 
     let raw: &[f64]      = unsafe { angles.as_slice()? };
@@ -219,10 +216,10 @@ pub fn raw_estimate_reuse(
         .into_par_iter()
         .map(|_| {
 
-            let mut rng = rand::thread_rng();
+            let mut rng = rand::rng();
             let mut x_mask: u128 = 0;
             for i in 0..pre_sin.len() {
-                if rng.gen::<f64>() < pre_sin[i] / (pre_sin[i] + pre_cos[i]) {
+                if rng.random::<f64>() < pre_sin[i] / (pre_sin[i] + pre_cos[i]) {
                     x_mask |= 1 << i;
                 }
             }
@@ -270,5 +267,5 @@ pub fn raw_estimate_reuse(
         .map(|alpha| (alpha.norm_sqr() / norm) * extent)
         .collect();
 
-    Ok(PyArray1::from_vec(py, probs).to_owned())
+    Ok(PyArray1::from_vec(py, probs).to_owned().into())
 }

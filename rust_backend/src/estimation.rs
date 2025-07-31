@@ -1,5 +1,5 @@
 use pyo3::prelude::*;
-use numpy::{PyArray1, PyArray2, PyArray3};
+use numpy::{PyArray1, PyArray2, PyArray3, PyArrayMethods};
 use num_complex::Complex64;
 use std::f64::consts::{PI, E};
 
@@ -28,18 +28,18 @@ fn calculate_trajectory_count(epsilon: f64, delta: f64, extent: f64, p: f64) -> 
 #[pyfunction]
 pub fn estimate(
     num_qubits: usize,
-    angles: &PyArray1<f64>,
+    angles: &Bound<'_, PyArray1<f64>>,
     negative_mask: u128,
     extent: f64,
     initial_state: u128,
     outcome_state: u128,
     epsilon_total: f64,
     delta_total: f64,
-    gate_types: &PyArray1<u8>,
-    params: &PyArray2<f64>,
-    qubits: &PyArray2<usize>,
-    orb_indices: &PyArray1<i64>,
-    orb_mats: &PyArray3<Complex64>,
+    gate_types: &Bound<'_, PyArray1<u8>>,
+    params: &Bound<'_, PyArray2<f64>>,
+    qubits: &Bound<'_, PyArray2<usize>>,
+    orb_indices: &Bound<'_, PyArray1<i64>>,
+    orb_mats: &Bound<'_, PyArray3<Complex64>>,
 ) -> PyResult<f64> {
 
     let raw: &[f64] = unsafe { angles.as_slice()? };
