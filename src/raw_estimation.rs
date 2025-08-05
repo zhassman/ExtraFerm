@@ -206,7 +206,6 @@ pub fn raw_estimate_udv_single(
     Ok(val)
 }
 
-
 pub fn raw_estimate_internal(
     num_qubits: usize,
     raw: &[f64],
@@ -229,46 +228,12 @@ pub fn raw_estimate_internal(
             (t.sin(), t.cos())
         })
         .unzip();
-    
-    let mut baserng = StdRng::from_os_rng();
-    let seeds: Vec<u64> = (&mut baserng).sample_iter(StandardUniform).take(trajectory_count).collect();
 
-    /*
-    let diags :HashSet<u128> = HashSet::from_iter(seeds.iter().map(|seed| {
-	let mut rng = StdRng::seed_from_u64(*seed);
-	let mut x_mask: u128 = 0;
-	for i in 0..pre_sin.len() {
-            if rng.random::<f64>() < pre_sin[i] / (pre_sin[i] + pre_cos[i]) {
-                    x_mask |= 1 << i;
-            }
-        }
-	let mut diag: Vec<i64> = vec![1; num_qubits];
-	let mut diag_mask: u128 = 0;
-	let mut cp_idx :i64 = 0;
-	for (k, &gt) in gts.iter().enumerate() {
-	    match gt {
-		1 => {
-		    let q1 = qmat[(k, 0)];
-		    let q2 = qmat[(k, 1)];
-		    if (x_mask >> cp_idx) & 1 == 1 {
-			diag_mask ^= 1 << q1;
-			diag_mask ^= 1 << q2;
-			
-			diag[q1] *= -1;
-			diag[q2] *= -1;
-		    }
-		    cp_idx += 1;
-		},
-		_ => {}
-	    }
-	}
-	diag_mask
-    }));*/
-    
-    let sum_alpha: Complex64 = seeds
+
+    let sum_alpha: Complex64 = (0..trajectory_count)
         .into_par_iter()
-        .map(|seed| {	    
-            let mut rng = StdRng::seed_from_u64(seed);
+        .map(|_| {
+            let mut rng = rand::rng();
             let mut x_mask: u128 = 0;
             for i in 0..pre_sin.len() {
                 if rng.random::<f64>() < pre_sin[i] / (pre_sin[i] + pre_cos[i]) {
@@ -307,7 +272,8 @@ pub fn raw_estimate_internal(
 
             j_phase * amp * sign
         })
-        .sum();
+        .reduce(|| Complex64::new(0.0, 0.0), |a, b| a + b);
+
     let end = std::time::Instant::now();
     println!("total computation time (internal) = {}", end.duration_since(start).as_secs_f64());
     let t2 = (trajectory_count * trajectory_count) as f64;
