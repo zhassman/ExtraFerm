@@ -347,3 +347,32 @@ def get_bitstrings_and_probs(
     probs = np.abs(statevec.vec)**2
     bitstrings = ffsim.addresses_to_strings(range(len(probs)), norb, nelec)
     return bitstrings, probs
+
+
+def is_udv(circuit: QuantumCircuit) -> bool:
+    """
+    Check if 'circuit' has the form:
+
+      X* , orb_rot_jw , CP* , orb_rot_jw
+      
+    (ignoring any global_phase gates).
+    """
+    ops = [instr.operation.name for instr in circuit.data
+           if instr.name != "global_phase"]
+
+    if ops.count("orb_rot_jw") != 2:
+        return False
+
+    first_idx = ops.index("orb_rot_jw")
+    second_idx = ops.index("orb_rot_jw", first_idx + 1)
+
+    if any(op != "x" for op in ops[:first_idx]):
+        return False
+
+    if any(op != "cp" for op in ops[first_idx + 1 : second_idx]):
+        return False
+
+    if second_idx != len(ops) - 1:
+        return False
+
+    return True

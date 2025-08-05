@@ -1,11 +1,11 @@
 from typing import Optional, Union, Sequence
 import numpy as np
 from qiskit.circuit import QuantumCircuit
-from .utils import CircuitData, extract_circuit_data, calculate_trajectory_count
+from .utils import CircuitData, extract_circuit_data, calculate_trajectory_count, is_udv
 from . import _lib as _rust
 
-    
-def raw_estimate(
+
+def raw_estimate_udv(
     *,
     circuit: Optional[QuantumCircuit]   = None,
     circuit_data: Optional[CircuitData] = None,
@@ -14,24 +14,24 @@ def raw_estimate(
     epsilon: Optional[float] = None,
     delta:   Optional[float] = None,
     p:       Optional[float] = None,
-    reuse_trajectories: Optional[bool] = False
 ) -> Union[float, np.ndarray]:
     """
-    Monte-Carlo estimate for one or more outcome_states(s). Pass:
+    A version of raw_estimate that is optimized to work for 'udv'
+    circuits. That is, any circuit of the form
+
+    X* , orb_rot_jw , CP* , orb_rot_jw.
+
+    This function returns a Monte-Carlo estimate for one or more 
+    outcome_states(s). Pass:
       - exactly one of circuit or circuit_data, and
       - exactly one of (trajectory_count) or (epsilon,delta,p).
 
     If 'trajectory_count' is provided, it is used directly.
     Otherwise it's computed from (epsilon,delta,p,extent).
 
-    If reuse_trajectories is set to True, then the Rust backend will
-    use the same pool of trajectories to calculate probabilities for
-    all bitstrings.
-
     Returns a float for a single state, or an ndarray for multiple.
     """
-    if reuse_trajectories and isinstance(outcome_states, int):
-        raise ValueError("'reuse_trajectories=True' only makes sense when 'outcome_states' is a sequence")
+    assert is_udv(circuit), "Circuit does not have the correct form."
 
     if (circuit is None) == (circuit_data is None):
         raise ValueError("Must pass exactly one of 'circuit' or 'circuit_data'")
@@ -59,26 +59,9 @@ def raw_estimate(
         )
 
     t = trajectory_count if (trajectory_count is not None) else calculate_trajectory_count(epsilon, delta, extent, p)
-    
+
     if isinstance(outcome_states, int):
-        return _rust.raw_estimate_single(
-            num_qubits,
-            normalized_angles,
-            negative_mask,
-            extent,
-            initial_state,
-            outcome_states,
-            t,
-            gate_types,
-            params,
-            qubits,
-            orb_indices,
-            orb_mats,
-        )
-    else:
-        
-        if reuse_trajectories:
-            return _rust.raw_estimate_reuse(
+        return _rust.raw_estimate_udv_single(
                 num_qubits,
                 normalized_angles,
                 negative_mask,
@@ -92,9 +75,8 @@ def raw_estimate(
                 orb_indices,
                 orb_mats,
             )
-
-        else:
-            return _rust.raw_estimate_batch(
+    else:
+        return _rust.raw_estimate_udv_batch(
                 num_qubits,
                 normalized_angles,
                 negative_mask,
