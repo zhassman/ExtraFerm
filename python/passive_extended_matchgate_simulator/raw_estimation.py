@@ -5,6 +5,46 @@ from .utils import CircuitData, extract_circuit_data, calculate_trajectory_count
 from . import _lib as _rust
 
 
+def raw_estimate_udv_single(
+    *,
+    circuit: Optional[QuantumCircuit]   = None,
+    circuit_data: Optional[CircuitData] = None,
+    outcome_states: Union[int, Sequence[int]],
+    trajectory_count: Optional[int] = None,
+    epsilon: Optional[float] = None,
+    delta:   Optional[float] = None,
+    p:       Optional[float] = None,
+    reuse_trajectories: Optional[bool] = False
+) -> float:
+    circuit_data = extract_circuit_data(circuit)
+    (
+        num_qubits,
+        extent,
+        negative_mask,
+        normalized_angles,
+        initial_state,
+        gate_types,
+        params,
+        qubits,
+        orb_indices,
+        orb_mats,
+    ) = circuit_data
+    t = calculate_trajectory_count(epsilon, delta, extent, p)
+    return _rust.raw_estimate_udv_single(
+            num_qubits,
+            normalized_angles,
+            negative_mask,
+            extent,
+            initial_state,
+            outcome_states,
+            t,
+            gate_types,
+            params,
+            qubits,
+            orb_indices,
+            orb_mats,
+        )
+    
 def raw_estimate(
     *,
     circuit: Optional[QuantumCircuit]   = None,
@@ -57,10 +97,10 @@ def raw_estimate(
         raise ValueError(
             "Must pass either 'trajectory_count' or all of 'epsilon, delta, p' but not both."
         )
+
     t = trajectory_count if (trajectory_count is not None) else calculate_trajectory_count(epsilon, delta, extent, p)
-
+    
     if isinstance(outcome_states, int):
-
         return _rust.raw_estimate_single(
             num_qubits,
             normalized_angles,
@@ -76,7 +116,7 @@ def raw_estimate(
             orb_mats,
         )
     else:
-
+        
         if reuse_trajectories:
             return _rust.raw_estimate_reuse(
                 num_qubits,
@@ -94,7 +134,6 @@ def raw_estimate(
             )
 
         else:
-
             return _rust.raw_estimate_batch(
                 num_qubits,
                 normalized_angles,
