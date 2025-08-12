@@ -2,15 +2,13 @@ use pyo3::prelude::*;
 use numpy::{PyArray1, PyArray2, PyArray3, PyArrayMethods};
 use num_complex::Complex64;
 use rand::Rng;
-use rand::SeedableRng;
-use rand::rngs::StdRng;
 use rayon::prelude::*;
 use ndarray::{Array2, Array3, Axis, s};
 use ndarray_linalg::Determinant;
 use std::collections::HashMap;
 use std::collections::HashSet;
-
-// use std::time;
+use rand::SeedableRng;
+use rand::rngs::SmallRng;
 
 
 pub fn raw_estimate_udv_internal(
@@ -27,9 +25,10 @@ pub fn raw_estimate_udv_internal(
     orb_idx: &[i64],
     orb_mats_arr: &Array3<Complex64>,
 ) -> f64 {
-    // let start = std::time::Instant::now();
+
     let u: Array2<Complex64> = orb_mats_arr.index_axis(Axis(0), orb_idx[0].try_into().unwrap()).to_owned();
     let v: Array2<Complex64> = orb_mats_arr.index_axis(Axis(0), orb_idx[orb_idx.len()-1].try_into().unwrap()).to_owned();
+
     let mut u_desired_cols: Vec<usize> = Vec::new();
     let mut v_desired_rows: Vec<usize> = Vec::new();
     for q in 0..num_qubits {
@@ -40,12 +39,15 @@ pub fn raw_estimate_udv_internal(
             v_desired_rows.push(q);
         }
     }
+
     let num_fermions = u_desired_cols.len();
     if num_fermions != v_desired_rows.len() {
         return 0.;
     }
+
     let mut u_subview = u.select(Axis(1), &u_desired_cols);
     let v_subview = v.select(Axis(0), &v_desired_rows);
+
     let mut cp_idx = 0;
     for (k, &gt) in gts.iter().enumerate() {
         match gt {
@@ -63,7 +65,9 @@ pub fn raw_estimate_udv_internal(
             _ => {}
         }
     }
+
     let base_mat = v_subview.dot(&u_subview);
+
     let mut corrections: Array3<Complex64> = Array3::zeros((num_qubits, num_fermions, num_fermions));
     for i in 0..num_qubits {
         let u_row_vec = u_subview.index_axis(Axis(0), i);
@@ -73,6 +77,7 @@ pub fn raw_estimate_udv_internal(
         let outer: Array2<Complex64> = v_reshaped.dot(&u_reshaped) * (-2.0);
         corrections.slice_mut(s![i, .., ..]).assign(&outer);
     }
+
     let (pre_sin, pre_cos): (Vec<f64>, Vec<f64>) = raw
         .iter()
         .map(|&theta| {
@@ -80,18 +85,35 @@ pub fn raw_estimate_udv_internal(
             (t.sin(), t.cos())
         })
         .unzip();
-    // let end_precomputation = std::time::Instant::now();
-    let mut rng = StdRng::from_os_rng();
-    let mut diags: HashSet<u128> = HashSet::new();
-    let mut x_masks_diags: HashMap<u128, u128> = HashMap::new();
+    let probs: Vec<f64> = pre_sin
+        .iter()
+        .zip(pre_cos.iter())
+        .map(|(s, c)| s / (s + c))
+        .collect();
+
+    let mut rng = SmallRng::from_os_rng();
+    let mut rand_buf: Vec<u64> = vec![0u64; probs.len()];
+    const INV_U64: f64 = 1.0 / ((u64::MAX as f64) + 1.0);
+
     let mut x_masks_counts: HashMap<u128, i64> = HashMap::new();
     for _ in 0..trajectory_count {
+        rng.fill(rand_buf.as_mut_slice());
         let mut x_mask: u128 = 0;
-        for i in 0..pre_sin.len() {
-            if rng.random::<f64>() < pre_sin[i] / (pre_sin[i] + pre_cos[i]) {
+        for (i, &r) in rand_buf.iter().enumerate() {
+            let u = (r as f64) * INV_U64;
+            if u < probs[i] {
                 x_mask |= 1 << i;
             }
         }
+        match x_masks_counts.get_mut(&x_mask) {
+            Some(count) => *count += 1,
+            None => { x_masks_counts.insert(x_mask, 1); }
+        }
+    }
+
+    let mut diags: HashSet<u128> = HashSet::new();
+    let mut x_masks_diags: HashMap<u128, u128> = HashMap::new();
+    for (&x_mask, _) in x_masks_counts.iter() {
         let mut diag_mask: u128 = 0;
         let mut cp_idx: i64 = 0;
         for (k, &gt) in gts.iter().enumerate() {
@@ -110,16 +132,8 @@ pub fn raw_estimate_udv_internal(
         }
         x_masks_diags.insert(x_mask, diag_mask);
         diags.insert(diag_mask);
-        match x_masks_counts.get_mut(&x_mask) {
-            Some(count) => {
-                *count += 1;
-            }
-            None => {
-                x_masks_counts.insert(x_mask, 1);
-            }
-        }
     }
-    // let end_hashmap_computation = std::time::Instant::now();
+
     let diags_dets: HashMap<u128, Complex64> = diags
         .into_par_iter()
         .map(|d| {
@@ -132,7 +146,7 @@ pub fn raw_estimate_udv_internal(
             (d, mat.det().unwrap())
         })
         .collect::<HashMap<u128, Complex64>>();
-    // let end_determinant_computation = std::time::Instant::now();
+
     let sum_alpha: Complex64 = x_masks_diags
         .into_iter()
         .map(|(x_mask, diag)| {
@@ -145,44 +159,13 @@ pub fn raw_estimate_udv_internal(
                 3 => Complex64::new(0.0, -1.0),
                 _ => unreachable!(),
             };
-            let sign = if (negative_mask & x_mask).count_ones() % 2 == 1 {
-                -1.0
-            } else {
-                1.0
-            };
+            let sign = if (negative_mask & x_mask).count_ones() % 2 == 1 { -1.0 } else { 1.0 };
             j_phase * amp * sign * count
         })
         .sum();
-    // let end_full_computation = std::time::Instant::now();
-    // println!(
-    //     "total computation time (udv) = {}",
-    //     end_full_computation.duration_since(start).as_secs_f64()
-    // );
-    // println!(
-    //     "precomputation time = {}",
-    //     end_precomputation.duration_since(start).as_secs_f64()
-    // );
-    // println!(
-    //     "hashmap time = {}",
-    //     end_hashmap_computation
-    //         .duration_since(end_precomputation)
-    //         .as_secs_f64()
-    // );
-    // println!(
-    //     "determinant time = {}",
-    //     end_determinant_computation
-    //         .duration_since(end_hashmap_computation)
-    //         .as_secs_f64()
-    // );
-    // println!(
-    //     "reduction time = {}",
-    //     end_full_computation
-    //         .duration_since(end_determinant_computation)
-    //         .as_secs_f64()
-    // );
+
     let t2 = (trajectory_count * trajectory_count) as f64;
-    let val = (sum_alpha.norm_sqr() / t2) * extent;
-    val
+    (sum_alpha.norm_sqr() / t2) * extent
 }
 
 
