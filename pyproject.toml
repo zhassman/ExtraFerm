@@ -4,7 +4,7 @@ build-backend = "maturin"
 
 [project]
 name = "passive-extended-matchgate-simulator"
-requires-python = ">=3.8"
+requires-python = ">=3.11"
 version = "0.1.0"
 description = "Passive extended matchgate quantum circuit simulator"
 readme = "README.md"
