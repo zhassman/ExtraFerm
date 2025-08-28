@@ -2,8 +2,8 @@ import math
 
 import pytest
 from numpy.testing import assert_allclose
-from passive_extended_matchgate_simulator.raw_estimation import raw_estimate
-from passive_extended_matchgate_simulator.utils import (
+from extended_matchgate_simulator.raw_estimation import raw_estimate
+from extended_matchgate_simulator.utils import (
     get_bitstrings_and_probs,
     make_parameterized_controlled_phase_circuit,
     ucj_to_compatible,
