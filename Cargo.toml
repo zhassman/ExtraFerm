@@ -1,12 +1,12 @@
 [package]
-name = "passive-extended-matchgate-simulator"
+name = "extended-matchgate-simulator"
 version = "0.1.0"
 edition = "2021"
-description = "Passive extended matchgate quantum circuit simulator"
+description = "Quantum circuit simulator for particle-number conserving extended matchgate circuits"
 license = "MIT OR Apache-2.0"
 
 [lib]
-name = "passive_extended_matchgate_simulator"
+name = "extended_matchgate_simulator"
 crate-type = ["cdylib"]
 
 [dependencies]

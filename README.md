@@ -1,11 +1,11 @@
-# Passive Extended Matchgate Simulator
+# Extended Matchgate Simulator
 
 ## Overview
 
-This library can be used to estimate the Born-rule probability of measurement outcomes produced by **passive extended matchgate circuits**:
+This library can be used to estimate the Born-rule probability of measurement outcomes produced by particle-number conserving **extended matchgate circuits**:
 
 - **Extended matchgate**: the universal gate set consisting of matchgates + controlled‑phase gates  
-- **Passive**: particle‑number conserving
+- **Particle-number conserving**: Hamming weight of initial state is unchanged by the circuit
 
 ## Circuit Extent
 
@@ -38,8 +38,8 @@ pip install -e .
 Install our simulator
 
 ```bash
-git clone https://github.com/zhassman/Passive-Extended-Matchgate-Simulator.git
-cd Passive-Extended-Matchgate-Simulator
+git clone https://github.com/zhassman/Extended-Matchgate-Simulator.git
+cd Extended-Matchgate-Simulator
 pip install -e .
 ```
 
