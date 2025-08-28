@@ -5,7 +5,7 @@
 This library can be used to estimate the Born-rule probability of measurement outcomes produced by particle-number conserving **extended matchgate circuits**:
 
 - **Extended matchgate**: the universal gate set consisting of matchgates + controlled‑phase gates  
-- **Particle-number conserving**: Hamming weight of initial state is unchanged by the circuit
+- **Particle-number conserving**: the Hamming weight of initial state is preserved at all points by the circuit
 
 ## Circuit Extent
 
