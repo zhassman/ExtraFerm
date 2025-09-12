@@ -11,7 +11,7 @@ use rand::SeedableRng;
 use rand::rngs::SmallRng;
 
 
-pub fn raw_estimate_udv_internal(
+pub fn raw_estimate_lucj_internal(
     num_qubits: usize,
     raw: &[f64],
     negative_mask: u128,
@@ -170,7 +170,7 @@ pub fn raw_estimate_udv_internal(
 
 
 #[pyfunction]
-pub fn raw_estimate_udv_single(
+pub fn raw_estimate_lucj_single(
     num_qubits: usize,
     angles: &Bound<'_, PyArray1<f64>>,
     negative_mask: u128,
@@ -193,7 +193,7 @@ pub fn raw_estimate_udv_single(
     if initial_state.count_ones() != outcome_state.count_ones() {
         Ok(0.0)
     } else {
-        Ok(raw_estimate_udv_internal(
+        Ok(raw_estimate_lucj_internal(
             num_qubits,
             raw,
             negative_mask,
@@ -212,7 +212,7 @@ pub fn raw_estimate_udv_single(
 
 
 #[pyfunction]
-pub fn raw_estimate_udv_batch(
+pub fn raw_estimate_lucj_batch(
     py: Python,
     num_qubits: usize,
     angles: &Bound<'_, PyArray1<f64>>,
@@ -242,7 +242,7 @@ pub fn raw_estimate_udv_batch(
             if initial_state.count_ones() != outcome_state.count_ones() {
                 0.0
             } else {
-                raw_estimate_udv_internal(
+                raw_estimate_lucj_internal(
                     num_qubits,
                     raw,
                     negative_mask,

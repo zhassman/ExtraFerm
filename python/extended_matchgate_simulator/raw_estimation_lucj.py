@@ -1,11 +1,11 @@
 from typing import Optional, Union, Sequence
 import numpy as np
 from qiskit.circuit import QuantumCircuit
-from .utils import CircuitData, extract_circuit_data, calculate_trajectory_count, is_udv
+from .utils import CircuitData, extract_circuit_data, calculate_trajectory_count, is_lucj
 from . import _lib as _rust
 
 
-def raw_estimate_udv(
+def raw_estimate_lucj(
     *,
     circuit: Optional[QuantumCircuit]   = None,
     circuit_data: Optional[CircuitData] = None,
@@ -16,7 +16,7 @@ def raw_estimate_udv(
     p:       Optional[float] = None,
 ) -> Union[float, np.ndarray]:
     """
-    A version of raw_estimate that is optimized to work for 'udv'
+    A version of raw_estimate that is optimized to work for 'lucj'
     circuits. That is, any circuit of the form
 
     X* , orb_rot_jw , CP* , orb_rot_jw.
@@ -31,7 +31,7 @@ def raw_estimate_udv(
 
     Returns a float for a single state, or an ndarray for multiple.
     """
-    assert is_udv(circuit), "Circuit does not have the correct form."
+    assert is_lucj(circuit), "Circuit does not have the correct form."
 
     if (circuit is None) == (circuit_data is None):
         raise ValueError("Must pass exactly one of 'circuit' or 'circuit_data'")
@@ -61,7 +61,7 @@ def raw_estimate_udv(
     t = trajectory_count if (trajectory_count is not None) else calculate_trajectory_count(epsilon, delta, extent, p)
 
     if isinstance(outcome_states, int):
-        return _rust.raw_estimate_udv_single(
+        return _rust.raw_estimate_lucj_single(
                 num_qubits,
                 normalized_angles,
                 negative_mask,
@@ -76,7 +76,7 @@ def raw_estimate_udv(
                 orb_mats,
             )
     else:
-        return _rust.raw_estimate_udv_batch(
+        return _rust.raw_estimate_lucj_batch(
                 num_qubits,
                 normalized_angles,
                 negative_mask,

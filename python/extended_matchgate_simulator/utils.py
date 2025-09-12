@@ -349,7 +349,7 @@ def get_bitstrings_and_probs(
     return bitstrings, probs
 
 
-def is_udv(circuit: QuantumCircuit) -> bool:
+def is_lucj(circuit: QuantumCircuit) -> bool:
     """
     Check if 'circuit' has the form:
 
