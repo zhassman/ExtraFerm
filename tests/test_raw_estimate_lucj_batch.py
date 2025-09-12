@@ -2,7 +2,7 @@ import math
 
 import pytest
 from numpy.testing import assert_allclose
-from extended_matchgate_simulator.raw_estimation_udv import raw_estimate_udv
+from extended_matchgate_simulator.raw_estimation_lucj import raw_estimate_lucj
 from extended_matchgate_simulator.utils import (
     get_bitstrings_and_probs,
     make_parameterized_controlled_phase_circuit,
@@ -23,13 +23,13 @@ MEANS = [
 
 
 @pytest.mark.parametrize("mean", MEANS)
-def test_six_qubit_raw_estimate_udv(mean):
+def test_six_qubit_raw_estimate_lucj(mean):
     var = 0.1
     epsilon, delta, p = 0.1, 0.01, 1
     norb, nelec = 3, (1, 1)
     circuit = make_parameterized_controlled_phase_circuit(norb, nelec, mean, var)
     bitstrings, exact_probs = get_bitstrings_and_probs(circuit, norb, nelec)
-    probs = raw_estimate_udv(
+    probs = raw_estimate_lucj(
         circuit=ucj_to_compatible(circuit),
         outcome_states=bitstrings,
         epsilon=epsilon,
@@ -46,7 +46,7 @@ def test_six_qubit_raw_estimate_udv(mean):
         (63, (1, 1), 0, 1e-5, 5, True),
     ],
 )
-def test_large_circuit_raw_estimate_udv(
+def test_large_circuit_raw_estimate_lucj(
     norb, nelec, mean, var, sample_size, reduced_interaction,
 ):
     epsilon, delta, p = 0.1, 0.01, 1
@@ -56,7 +56,7 @@ def test_large_circuit_raw_estimate_udv(
     bitstrings, exact_probs = get_bitstrings_and_probs(circuit, norb, nelec)
     bitstrings = bitstrings[:sample_size]
     exact_probs = exact_probs[:sample_size]
-    probs = raw_estimate_udv(
+    probs = raw_estimate_lucj(
         circuit=ucj_to_compatible(circuit),
         outcome_states=bitstrings,
         epsilon=epsilon,

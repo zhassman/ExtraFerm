@@ -2,7 +2,7 @@ import math
 
 import pytest
 from numpy.testing import assert_allclose
-from extended_matchgate_simulator.raw_estimation_udv import raw_estimate_udv
+from extended_matchgate_simulator.raw_estimation_lucj import raw_estimate_lucj
 from extended_matchgate_simulator.utils import (
     get_bitstrings_and_probs,
     make_parameterized_controlled_phase_circuit,
@@ -23,7 +23,7 @@ MEANS = [
 
 
 @pytest.mark.parametrize("mean", MEANS)
-def test_six_qubit_raw_estimate_udv(mean):
+def test_six_qubit_raw_estimate_lucj(mean):
     var = 0.1
     epsilon, delta, p = 0.1, 0.01, 1
     norb, nelec = 3, (1, 1)
@@ -31,7 +31,7 @@ def test_six_qubit_raw_estimate_udv(mean):
     bitstrings, exact_probs = get_bitstrings_and_probs(circuit, norb, nelec)
     converted = ucj_to_compatible(circuit)
     probs = [
-        raw_estimate_udv(
+        raw_estimate_lucj(
             circuit=converted,
             outcome_states=b,
             epsilon=epsilon,
@@ -50,7 +50,7 @@ def test_six_qubit_raw_estimate_udv(mean):
         (63, (1, 1), 0, 1e-5, 5, True),
     ],
 )
-def test_large_circuit_raw_estimate_udv(
+def test_large_circuit_raw_estimate_lucj(
     norb,
     nelec,
     mean,
@@ -71,7 +71,7 @@ def test_large_circuit_raw_estimate_udv(
     exact_probs = exact_probs[:sample_size]
     converted = ucj_to_compatible(circuit)
     probs = [
-        raw_estimate_udv(
+        raw_estimate_lucj(
             circuit=converted,
             outcome_states=b,
             epsilon=epsilon,
