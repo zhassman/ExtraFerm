@@ -2,6 +2,8 @@ use pyo3::prelude::*;
 use numpy::{PyArray1, PyArray2, PyArray3, PyArrayMethods};
 use num_complex::Complex64;
 use std::f64::consts::{PI, E};
+use rayon::prelude::*;
+use ndarray::{Array2, Array3};
 
 use crate::raw_estimation::raw_estimate_internal;
 
@@ -25,29 +27,22 @@ fn calculate_trajectory_count(epsilon: f64, delta: f64, extent: f64, p: f64) -> 
 }
 
 
-#[pyfunction]
-pub fn estimate(
+pub fn estimate_internal(
     num_qubits: usize,
-    angles: &Bound<'_, PyArray1<f64>>,
+    angles: &[f64],
     negative_mask: u128,
     extent: f64,
     initial_state: u128,
     outcome_state: u128,
     epsilon_total: f64,
     delta_total: f64,
-    gate_types: &Bound<'_, PyArray1<u8>>,
-    params: &Bound<'_, PyArray2<f64>>,
-    qubits: &Bound<'_, PyArray2<usize>>,
-    orb_indices: &Bound<'_, PyArray1<i64>>,
-    orb_mats: &Bound<'_, PyArray3<Complex64>>,
-) -> PyResult<f64> {
+    gate_types: &[u8],
+    pmat: &Array2<f64>,
+    qmat: &Array2<usize>,
+    orb_idx: &[i64],
+    orb_mats_arr: &Array3<Complex64>,
+) -> f64 {
 
-    let raw: &[f64] = unsafe { angles.as_slice()? };
-    let gts: &[u8] = unsafe { gate_types.as_slice()? };
-    let pmat = unsafe { params.as_array().to_owned() };
-    let qmat = unsafe { qubits.as_array().to_owned() };
-    let orb_idx: &[i64] = unsafe { orb_indices.as_slice()? };
-    let orb_mats_arr = unsafe { orb_mats.as_array().to_owned() };
 
     let mut p_star = 1.0;
     let mut p_hat = 1.0;
@@ -68,17 +63,17 @@ pub fn estimate(
         } else {
             raw_estimate_internal(
                 num_qubits,
-                raw,
+                angles,
                 negative_mask,
                 extent,
                 initial_state,
                 outcome_state,
                 s,
-                gts,
-                &pmat,
-                &qmat,
+                gate_types,
+                pmat,
+                qmat,
                 orb_idx,
-                &orb_mats_arr,
+                orb_mats_arr,
             )
         };
         p_hat = estimate_val;
@@ -91,5 +86,97 @@ pub fn estimate(
         s *= 2;
     }
 
-    Ok(p_hat)
+    p_hat
+}
+
+
+#[pyfunction]
+pub fn estimate_single(
+    num_qubits: usize,
+    angles: &Bound<'_, PyArray1<f64>>,
+    negative_mask: u128,
+    extent: f64,
+    initial_state: u128,
+    outcome_state: u128,
+    epsilon_total: f64,
+    delta_total: f64,
+    gate_types: &Bound<'_, PyArray1<u8>>,
+    params: &Bound<'_, PyArray2<f64>>,
+    qubits: &Bound<'_, PyArray2<usize>>,
+    orb_indices: &Bound<'_, PyArray1<i64>>,
+    orb_mats: &Bound<'_, PyArray3<Complex64>>,
+) -> PyResult<f64> {
+    let raw: &[f64] = unsafe { angles.as_slice()? };
+    let gts: &[u8] = unsafe { gate_types.as_slice()? };
+    let pmat = unsafe { params.as_array().to_owned() };
+    let qmat = unsafe { qubits.as_array().to_owned() };
+    let orb_idx: &[i64] = unsafe { orb_indices.as_slice()? };
+    let orb_mats_arr = unsafe { orb_mats.as_array().to_owned() };
+
+    Ok(estimate_internal(
+        num_qubits,
+        raw,
+        negative_mask,
+        extent,
+        initial_state,
+        outcome_state,
+        epsilon_total,
+        delta_total,
+        gts,
+        &pmat,
+        &qmat,
+        orb_idx,
+        &orb_mats_arr,
+    ))
+}
+
+
+#[pyfunction]
+pub fn estimate_batch(
+    py: Python,
+    num_qubits: usize,
+    angles: &Bound<'_, PyArray1<f64>>,
+    negative_mask: u128,
+    extent: f64,
+    initial_state: u128,
+    outcome_states: &Bound<'_, PyAny>,
+    epsilon_total: f64,
+    delta_total: f64,
+    gate_types: &Bound<'_, PyArray1<u8>>,
+    params: &Bound<'_, PyArray2<f64>>,
+    qubits: &Bound<'_, PyArray2<usize>>,
+    orb_indices: &Bound<'_, PyArray1<i64>>,
+    orb_mats: &Bound<'_, PyArray3<Complex64>>,
+) -> PyResult<Py<PyArray1<f64>>> {
+    let raw: &[f64] = unsafe { angles.as_slice()? };
+    let gts: &[u8] = unsafe { gate_types.as_slice()? };
+    let pmat = unsafe { params.as_array().to_owned() };
+    let qmat = unsafe { qubits.as_array().to_owned() };
+    let orb_idx: &[i64] = unsafe { orb_indices.as_slice()? };
+    let orb_mats_arr = unsafe { orb_mats.as_array().to_owned() };
+
+    let outs: Vec<u128> = outcome_states.extract()?;
+
+    let results: Vec<f64> = outs
+        .into_par_iter()
+        .map(|outcome_state| {
+            estimate_internal(
+                num_qubits,
+                raw,
+                negative_mask,
+                extent,
+                initial_state,
+                outcome_state,
+                epsilon_total,
+                delta_total,
+                gts,
+                &pmat,
+                &qmat,
+                orb_idx,
+                &orb_mats_arr,
+            )
+        })
+        .collect();
+
+    Ok(PyArray1::from_vec(py, results).to_owned().into())
 }
