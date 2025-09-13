@@ -1,24 +1,24 @@
 from scipy.linalg import block_diag
 import numpy as np
 import math
-from typing import Tuple, Optional
+from typing import Optional, NamedTuple
 from numpy.typing import NDArray
 from qiskit.circuit import QuantumCircuit, QuantumRegister
 import ffsim
 
 
-CircuitData = Tuple[
-    int,
-    float,
-    int,
-    np.ndarray,
-    int,
-    np.ndarray,
-    np.ndarray,
-    np.ndarray,
-    np.ndarray,
-    np.ndarray,
-]
+class CircuitData(NamedTuple):
+    """Circuit data structure for the Rust backend."""
+    num_qubits: int
+    extent: float
+    negative_mask: int
+    normalized_angles: NDArray[np.float64]
+    initial_state: int
+    gate_types: NDArray[np.uint8]
+    params: NDArray[np.float64]
+    qubits: NDArray[np.uint64]
+    orb_indices: NDArray[np.int64]
+    orb_mats: NDArray[np.complex128]
 
 
 def extract_circuit_data(
@@ -149,17 +149,17 @@ def extract_circuit_data(
 
     extent = calculate_extent(normalized_angles)
 
-    return (
-        num_qubits,
-        extent,
-        negative_mask,
-        np.array(normalized_angles, dtype=np.float64),
-        initial_state,
-        np.array(gate_types,  dtype=np.uint8),
-        np.array(params,      dtype=np.float64),
-        np.array(qubits,      dtype=np.uint64),
-        np.array(orb_indices, dtype=np.int64),
-        orb_mats_arr,
+    return CircuitData(
+        num_qubits=num_qubits,
+        extent=extent,
+        negative_mask=negative_mask,
+        normalized_angles=np.array(normalized_angles, dtype=np.float64),
+        initial_state=initial_state,
+        gate_types=np.array(gate_types, dtype=np.uint8),
+        params=np.array(params, dtype=np.float64),
+        qubits=np.array(qubits, dtype=np.uint64),
+        orb_indices=np.array(orb_indices, dtype=np.int64),
+        orb_mats=orb_mats_arr,
     )
 
 

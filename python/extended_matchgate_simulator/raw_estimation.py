@@ -7,8 +7,7 @@ from . import _lib as _rust
     
 def raw_estimate(
     *,
-    circuit: Optional[QuantumCircuit]   = None,
-    circuit_data: Optional[CircuitData] = None,
+    circuit: QuantumCircuit,
     outcome_states: Union[int, Sequence[int]],
     trajectory_count: Optional[int] = None,
     epsilon: Optional[float] = None,
@@ -17,12 +16,12 @@ def raw_estimate(
     reuse_trajectories: Optional[bool] = False
 ) -> Union[float, np.ndarray]:
     """
-    Monte-Carlo estimate for one or more outcome_states(s). Pass:
-      - exactly one of circuit or circuit_data, and
-      - exactly one of (trajectory_count) or (epsilon,delta,p).
+    Monte-Carlo estimate for one or more outcome_states(s). Pass exactly one of:
+      - trajectory_count, or
+      - (epsilon, delta, p).
 
     If 'trajectory_count' is provided, it is used directly.
-    Otherwise it's computed from (epsilon,delta,p,extent).
+    Otherwise it's computed from (epsilon, delta, p, extent).
 
     If reuse_trajectories is set to True, then the Rust backend will
     use the same pool of trajectories to calculate probabilities for
@@ -33,24 +32,18 @@ def raw_estimate(
     if reuse_trajectories and isinstance(outcome_states, int):
         raise ValueError("'reuse_trajectories=True' only makes sense when 'outcome_states' is a sequence")
 
-    if (circuit is None) == (circuit_data is None):
-        raise ValueError("Must pass exactly one of 'circuit' or 'circuit_data'")
+    circuit_data = extract_circuit_data(circuit)
 
-    if circuit_data is None:
-        circuit_data = extract_circuit_data(circuit)
-
-    (
-        num_qubits,
-        extent,
-        negative_mask,
-        normalized_angles,
-        initial_state,
-        gate_types,
-        params,
-        qubits,
-        orb_indices,
-        orb_mats,
-    ) = circuit_data
+    num_qubits = circuit_data.num_qubits
+    extent = circuit_data.extent
+    negative_mask = circuit_data.negative_mask
+    normalized_angles = circuit_data.normalized_angles
+    initial_state = circuit_data.initial_state
+    gate_types = circuit_data.gate_types
+    params = circuit_data.params
+    qubits = circuit_data.qubits
+    orb_indices = circuit_data.orb_indices
+    orb_mats = circuit_data.orb_mats
 
     accuracy_args = (epsilon is not None) and (delta is not None) and (p is not None)
     if (trajectory_count is None) == (not accuracy_args):

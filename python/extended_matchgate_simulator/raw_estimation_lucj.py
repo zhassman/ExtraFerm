@@ -39,18 +39,16 @@ def raw_estimate_lucj(
     if circuit_data is None:
         circuit_data = extract_circuit_data(circuit)
 
-    (
-        num_qubits,
-        extent,
-        negative_mask,
-        normalized_angles,
-        initial_state,
-        gate_types,
-        params,
-        qubits,
-        orb_indices,
-        orb_mats,
-    ) = circuit_data
+    num_qubits = circuit_data.num_qubits
+    extent = circuit_data.extent
+    negative_mask = circuit_data.negative_mask
+    normalized_angles = circuit_data.normalized_angles
+    initial_state = circuit_data.initial_state
+    gate_types = circuit_data.gate_types
+    params = circuit_data.params
+    qubits = circuit_data.qubits
+    orb_indices = circuit_data.orb_indices
+    orb_mats = circuit_data.orb_mats
 
     accuracy_args = (epsilon is not None) and (delta is not None) and (p is not None)
     if (trajectory_count is None) == (not accuracy_args):

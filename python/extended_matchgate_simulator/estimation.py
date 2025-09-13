@@ -6,19 +6,16 @@ from .utils import extract_circuit_data, CircuitData
 
 def estimate(
     *,
-    circuit: Optional[QuantumCircuit] = None,
-    circuit_data: Optional[CircuitData] = None,
+    circuit: QuantumCircuit,
     outcome_states: Union[int, Sequence[int]],
     epsilon: float,
     delta: float,
 ) -> Union[float, np.ndarray]:
     """
     Estimate probability for one or more outcome states using adaptive Monte Carlo.
-    Pass exactly one of circuit or circuit_data.
     
     Args:
-        circuit: QuantumCircuit object (optional)
-        circuit_data: Pre-extracted circuit data (optional)
+        circuit: QuantumCircuit object
         outcome_states: Single state (int) or sequence of states
         epsilon: Target accuracy
         delta: Confidence parameter
@@ -27,23 +24,18 @@ def estimate(
         Float for single state, ndarray for multiple states.
         Multiple states are computed in parallel for efficiency.
     """
-    if (circuit is None) == (circuit_data is None):
-        raise ValueError("Provide exactly one of circuit or circuit_data")
-    if circuit_data is None:
-        circuit_data = extract_circuit_data(circuit)
+    circuit_data = extract_circuit_data(circuit)
 
-    (
-        num_qubits,
-        extent,
-        negative_mask,
-        angles,
-        initial_state,
-        gate_types,
-        params,
-        qubits,
-        orb_indices,
-        orb_mats,
-    ) = circuit_data
+    num_qubits = circuit_data.num_qubits
+    extent = circuit_data.extent
+    negative_mask = circuit_data.negative_mask
+    angles = circuit_data.normalized_angles
+    initial_state = circuit_data.initial_state
+    gate_types = circuit_data.gate_types
+    params = circuit_data.params
+    qubits = circuit_data.qubits
+    orb_indices = circuit_data.orb_indices
+    orb_mats = circuit_data.orb_mats
 
     if isinstance(outcome_states, int):
         return _rust.estimate_single(

@@ -7,37 +7,30 @@ from . import _lib as _rust
 
 def exact_calculation(
     *,
-    circuit: Optional[QuantumCircuit] = None,
-    circuit_data: Optional[CircuitData] = None,
+    circuit: QuantumCircuit,
     outcome_states: Union[int, Sequence[int]],
 ) -> Union[float, np.ndarray]:
     """
     Exact calculation of circuit outcome probabilities by summing over all controlled-phase masks.
 
-    Pass exactly one of 'circuit' or 'circuit_data', and one 'outcome_states' (int or sequence of ints).
+    Args:
+        circuit: QuantumCircuit object
+        outcome_states: Single state (int) or sequence of states
 
     Returns:
         - float if a single int is passed,
         - numpy.ndarray of floats if a sequence is passed.
     """
-    if (circuit is None) == (circuit_data is None):
-        raise ValueError("Must pass exactly one of 'circuit' or 'circuit_data'")
+    circuit_data = extract_circuit_data(circuit)
 
-    if circuit_data is None:
-        circuit_data = extract_circuit_data(circuit)
-
-    (
-        num_qubits,
-        _extent,
-        _negative_mask,
-        normalized_angles,
-        initial_state,
-        gate_types,
-        params,
-        qubits,
-        orb_indices,
-        orb_mats,
-    ) = circuit_data
+    num_qubits = circuit_data.num_qubits
+    normalized_angles = circuit_data.normalized_angles
+    initial_state = circuit_data.initial_state
+    gate_types = circuit_data.gate_types
+    params = circuit_data.params
+    qubits = circuit_data.qubits
+    orb_indices = circuit_data.orb_indices
+    orb_mats = circuit_data.orb_mats
 
     if isinstance(outcome_states, int):
         out_list = [outcome_states]
