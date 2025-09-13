@@ -39,7 +39,7 @@ pub fn exact_calculation(
         .collect();
 
     if !valid.is_empty() {
-        let num_mask = 1 << raw.len();
+        let num_mask = 1u128 << raw.len();
 
         let accum: Vec<Complex64> = (0..num_mask)
             .into_par_iter()

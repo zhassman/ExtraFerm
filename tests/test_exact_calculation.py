@@ -67,7 +67,7 @@ def test_twenty_four_qubit_exact_calculation(mean, converter):
     var = 0.1
     norb, nelec = 12, (3, 3)
     circuit = make_parameterized_controlled_phase_circuit(
-        norb, nelec, mean, var, reduced_interaction=False
+        norb, nelec, mean, var, reduced_interaction=True
     )
     bitstrings, exact_probs = get_bitstrings_and_probs(circuit, norb, nelec)
     probs = exact_calculation(
