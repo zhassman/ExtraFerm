@@ -6,6 +6,7 @@ use rayon::prelude::*;
 use ndarray::{Array2, Array3};
 
 use crate::raw_estimation::raw_estimate_internal;
+use crate::raw_estimation_lucj::raw_estimate_lucj_internal;
 
 
 fn calculate_epsilon(p: f64, delta: f64, s: usize, extent: f64) -> f64 {
@@ -36,6 +37,7 @@ pub fn estimate_internal(
     outcome_state: u128,
     epsilon_total: f64,
     delta_total: f64,
+    use_lucj: bool,
     gate_types: &[u8],
     pmat: &Array2<f64>,
     qmat: &Array2<usize>,
@@ -60,6 +62,21 @@ pub fn estimate_internal(
 
         let estimate_val = if initial_state.count_ones() != outcome_state.count_ones() {
             0.0
+        } else if use_lucj {
+            raw_estimate_lucj_internal(
+                num_qubits,
+                angles,
+                negative_mask,
+                extent,
+                initial_state,
+                outcome_state,
+                s,
+                gate_types,
+                pmat,
+                qmat,
+                orb_idx,
+                orb_mats_arr,
+            )
         } else {
             raw_estimate_internal(
                 num_qubits,
@@ -77,7 +94,7 @@ pub fn estimate_internal(
             )
         };
         p_hat = estimate_val;
-        println!("k: {}, pHat: {}, eStar: {}, epsTot: {}", k, p_hat, e_star, epsilon_total);
+        // println!("k: {}, pHat: {}, eStar: {}, epsTot: {}", k, p_hat, e_star, epsilon_total);
 
         p_star = (p_star.min(p_hat + e_star)).clamp(0.0, 1.0);
 
@@ -100,6 +117,7 @@ pub fn estimate_single(
     outcome_state: u128,
     epsilon_total: f64,
     delta_total: f64,
+    use_lucj: bool,
     gate_types: &Bound<'_, PyArray1<u8>>,
     params: &Bound<'_, PyArray2<f64>>,
     qubits: &Bound<'_, PyArray2<usize>>,
@@ -122,6 +140,7 @@ pub fn estimate_single(
         outcome_state,
         epsilon_total,
         delta_total,
+        use_lucj,
         gts,
         &pmat,
         &qmat,
@@ -142,6 +161,7 @@ pub fn estimate_batch(
     outcome_states: &Bound<'_, PyAny>,
     epsilon_total: f64,
     delta_total: f64,
+    use_lucj: bool,
     gate_types: &Bound<'_, PyArray1<u8>>,
     params: &Bound<'_, PyArray2<f64>>,
     qubits: &Bound<'_, PyArray2<usize>>,
@@ -169,6 +189,7 @@ pub fn estimate_batch(
                 outcome_state,
                 epsilon_total,
                 delta_total,
+                use_lucj,
                 gts,
                 &pmat,
                 &qmat,

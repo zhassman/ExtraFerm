@@ -2,7 +2,7 @@ from typing import Optional, Union, Sequence
 import numpy as np
 from qiskit.circuit import QuantumCircuit
 from . import _lib as _rust
-from .utils import extract_circuit_data, CircuitData
+from .utils import extract_circuit_data, is_lucj
 
 def estimate(
     *,
@@ -25,6 +25,7 @@ def estimate(
         Multiple states are computed in parallel for efficiency.
     """
     circuit_data = extract_circuit_data(circuit)
+    use_lucj = is_lucj(circuit)
 
     num_qubits = circuit_data.num_qubits
     extent = circuit_data.extent
@@ -47,6 +48,7 @@ def estimate(
             outcome_states,
             epsilon,
             delta,
+            use_lucj,
             gate_types,
             params,
             qubits,
@@ -63,6 +65,7 @@ def estimate(
             outcome_states,
             epsilon,
             delta,
+            use_lucj,
             gate_types,
             params,
             qubits,
