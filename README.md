@@ -42,22 +42,3 @@ git clone https://github.com/zhassman/Extended-Matchgate-Simulator.git
 cd Extended-Matchgate-Simulator
 pip install -e .
 ```
-
-If you are using an Intel processor, update your `Cargo.toml` from:
-
-```toml
-ndarray-linalg = "0.17.0"
-```
-
-to:
-
-```toml
-ndarray-linalg = { version = "0.17.0", features = ["intel-mkl"] }
-```
-
-then run:
-
-```bash
-pip install maturin
-maturin develop --release
-```

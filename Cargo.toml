@@ -27,3 +27,6 @@ panic = "abort"
 [profile.dev]
 opt-level = 0
 debug = true
+
+[target.'cfg(target_os = "linux")'.dependencies]
+ndarray-linalg = { version = "0.17.0", features = ["intel-mkl"] }
