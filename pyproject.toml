@@ -20,6 +20,7 @@ dependencies = [
 dev = [
   "pytest>=8.4.0",
   "maturin>=1.0",
+  "ffsim>=0.0.60",
 ]
 
 [tool.maturin]
