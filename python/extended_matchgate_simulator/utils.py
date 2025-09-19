@@ -166,8 +166,8 @@ def extract_circuit_data(
 def calculate_trajectory_count(
     epsilon: float,
     delta: float,
-    extent: float,
     p: float,
+    extent: float,
 ) -> int:
     """
     Computes a lower bound on the number of trajectories needed for 
@@ -183,9 +183,10 @@ def calculate_trajectory_count(
     root_e = math.sqrt(extent)
     root_p = math.sqrt(p)
     numerator = (root_e + root_p) ** 2
-    log_term = math.log(2 * math.exp(2) / delta)
-    denominator = (math.sqrt(p + epsilon) - root_p) ** 2
-    return math.ceil(2 * numerator * log_term / denominator)
+    log_term = math.log(2.0) + 2.0 - math.log(delta)
+    denom_temp = math.sqrt(p + epsilon) + root_p
+    denominator = (epsilon ** 2) / (denom_temp ** 2)
+    return math.ceil(2.0 * numerator * log_term / denominator)
 
 
 def calculate_extent(

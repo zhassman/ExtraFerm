@@ -51,7 +51,7 @@ def raw_estimate(
             "Must pass either 'trajectory_count' or all of 'epsilon, delta, p' but not both."
         )
 
-    t = trajectory_count if (trajectory_count is not None) else calculate_trajectory_count(epsilon, delta, extent, p)
+    t = trajectory_count if (trajectory_count is not None) else calculate_trajectory_count(epsilon, delta, p, extent)
     
     if isinstance(outcome_states, int):
         return _rust.raw_estimate_single(
