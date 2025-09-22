@@ -19,7 +19,7 @@ where $\theta_j$ is the angle of the $j$-th controlled-phase gate.
 
 ## Use
 
-Users should interact with the simulator through the [`outcome_probabilities`](python/extended_matchgate_simulator/interface.py) from `interface.py`. 
+Users should interact with the simulator through the [`outcome_probabilities`](python/extended_matchgate_simulator/interface.py) function in `interface.py`. 
 
 ## Example
 
