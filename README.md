@@ -19,9 +19,11 @@ where $\theta_j$ is the angle of the $j$-th controlled-phase gate.
 
 ## Use
 
-Users should interact with the simulator through [interface.py](python/extended_matchgate_simulator/interface.py)
+Users should interact with the simulator through the [`outcome_probabilities`](python/extended_matchgate_simulator/interface.py) from `interface.py`. 
 
 ## Algorithms
+
+Under the hood, users have access to the following algorithms.
 
 - **`raw_estimate()`** considers additive error $\epsilon$, failure probability $\delta$, and Born-rule probability upper bound $p$. This algorithm is best for general-purpose estimation of probabilities for moderate values of $\epsilon, \delta$.
 
