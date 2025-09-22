@@ -21,15 +21,16 @@ where $\theta_j$ is the angle of the $j$-th controlled-phase gate.
 
 Users should interact with the simulator through the [`outcome_probabilities`](python/extended_matchgate_simulator/interface.py) from `interface.py`. 
 
-## Algorithms
+## Example
 
-Under the hood, users have access to the following algorithms.
-
-- **`raw_estimate()`** considers additive error $\epsilon$, failure probability $\delta$, and Born-rule probability upper bound $p$. This algorithm is best for general-purpose estimation of probabilities for moderate values of $\epsilon, \delta$.
-
-- **`estimate()`** considers additive error $\epsilon$ and failure probability $\delta$ and is best for estimating outcome measurements with very high accuracy (small $\epsilon, \delta$). This routine enjoys further speedups when the probability that we wish to estimate is small.
-
-- **`exact_calculation()`** computes exact probabilities and is useful when the number of controlled-phase gates is very small (<15).
+```python
+probabilities = outcome_probabilities(
+    circuit=my_circuit,
+    outcome_states=bitstrings,
+    additive_error=0.01,
+    failure_probability=1e-3,
+)
+```
 
 ## Setup
 
