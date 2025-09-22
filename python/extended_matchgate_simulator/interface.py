@@ -41,7 +41,7 @@ def outcome_probabilities(
        - Performance: O(2^k) where k is the number of controlled-phase gates
     
     **Automatic Optimizations:**
-    - LUCJ circuits (X*, orb_rot_jw, CP*, orb_rot_jw pattern) automatically use optimized routines
+    - LUCJ circuits (pauli_x*, orb_rot_jw, controlled-phase, orb_rot_jw pattern) have optimized paths.
     
     Args:
         circuit: QuantumCircuit compatible with matchgate simulation
@@ -57,16 +57,16 @@ def outcome_probabilities(
     
     Examples:
         # Exact calculation
-        prob = calculate_probability(circuit=qc, outcome_states=0b1010)
+        prob = outcome_probabilities(circuit=qc, outcome_states=0b1010)
         
         # Adaptive estimate with error bounds
-        prob = calculate_probability(circuit=qc, outcome_states=[0b1010, 0b0101], additive_error=0.01, failure_probability=0.05)
+        prob = outcome_probabilities(circuit=qc, outcome_states=[0b1010, 0b0101], additive_error=0.01, failure_probability=0.05)
         
         # Raw estimate with fixed trajectory count
-        prob = calculate_probability(circuit=qc, outcome_states=0b1010, trajectory_count=10000)
+        prob = outcome_probabilities(circuit=qc, outcome_states=0b1010, trajectory_count=10000)
         
         # Raw estimate with accuracy bounds
-        prob = calculate_probability(circuit=qc, outcome_states=[0b1010, 0b0101], additive_error=0.01, failure_probability=0.05, probability_upper_bound=0.1)
+        prob = outcome_probabilities(circuit=qc, outcome_states=[0b1010, 0b0101], additive_error=0.01, failure_probability=0.05, probability_upper_bound=0.1)
     """
     
     # Parameter validation
