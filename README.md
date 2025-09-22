@@ -17,6 +17,10 @@ $$
 
 where $\theta_j$ is the angle of the $j$-th controlled-phase gate.
 
+## Use
+
+Users should interact with the simulator through interface.py
+
 ## Algorithms
 
 - **`raw_estimate()`** considers additive error $\epsilon$, failure probability $\delta$, and Born-rule probability upper bound $p$. This algorithm is best for general-purpose estimation of probabilities for moderate values of $\epsilon, \delta$.
@@ -27,15 +31,7 @@ where $\theta_j$ is the angle of the $j$-th controlled-phase gate.
 
 ## Setup
 
-Install the latest version of **ffsim**:
-
-```bash
-git clone https://github.com/qiskit-community/ffsim.git
-cd ffsim
-pip install -e .
-```
-
-Install our simulator
+Install this repository
 
 ```bash
 git clone https://github.com/zhassman/Extended-Matchgate-Simulator.git

@@ -8,7 +8,7 @@ import numpy as np
 from qiskit.circuit import QuantumCircuit
 
 
-def calculate_probability(
+def outcome_probabilities(
     *,
     circuit: QuantumCircuit,
     outcome_states: Union[int, Sequence[int]],
@@ -30,7 +30,7 @@ def calculate_probability(
        - Parameters: Provide either trajectory_count OR (additive_error, failure_probability, probability_upper_bound)
        - Performance: Fastest for multiple bitstrings - O(trajectory_count)
     
-    2. **Adaptive Estimate**: Uses adaptive Monte Carlo with theoretical error bounds.
+    2. **Estimate**: Uses adaptive calls to Raw Estiamte with theoretical error bounds.
        - Use when: You want very high accuracy for fewer bitstrings
        - Parameters: Provide additive_error and failure_probability
        - Performance: Adaptive - automatically determines sample size for guaranteed accuracy
