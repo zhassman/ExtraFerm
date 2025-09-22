@@ -1,4 +1,4 @@
-from typing import Optional, Union, Sequence
+from typing import Union, Sequence
 import numpy as np
 from qiskit.circuit import QuantumCircuit
 from . import _lib as _rust
