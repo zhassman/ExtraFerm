@@ -43,6 +43,7 @@ pub fn estimate_internal(
     qmat: &Array2<usize>,
     orb_idx: &[i64],
     orb_mats_arr: &Array3<Complex64>,
+    seed: u64,
 ) -> f64 {
 
 
@@ -76,6 +77,7 @@ pub fn estimate_internal(
                 qmat,
                 orb_idx,
                 orb_mats_arr,
+                seed,
             )
         } else {
             raw_estimate_internal(
@@ -91,6 +93,7 @@ pub fn estimate_internal(
                 qmat,
                 orb_idx,
                 orb_mats_arr,
+                seed,
             )
         };
         p_hat = estimate_val;
@@ -123,6 +126,7 @@ pub fn estimate_single(
     qubits: &Bound<'_, PyArray2<usize>>,
     orb_indices: &Bound<'_, PyArray1<i64>>,
     orb_mats: &Bound<'_, PyArray3<Complex64>>,
+    seed: u64,
 ) -> PyResult<f64> {
     let raw: &[f64] = unsafe { angles.as_slice()? };
     let gts: &[u8] = unsafe { gate_types.as_slice()? };
@@ -146,6 +150,7 @@ pub fn estimate_single(
         &qmat,
         orb_idx,
         &orb_mats_arr,
+        seed,
     ))
 }
 
@@ -167,6 +172,7 @@ pub fn estimate_batch(
     qubits: &Bound<'_, PyArray2<usize>>,
     orb_indices: &Bound<'_, PyArray1<i64>>,
     orb_mats: &Bound<'_, PyArray3<Complex64>>,
+    seed: u64,
 ) -> PyResult<Py<PyArray1<f64>>> {
     let raw: &[f64] = unsafe { angles.as_slice()? };
     let gts: &[u8] = unsafe { gate_types.as_slice()? };
@@ -179,7 +185,8 @@ pub fn estimate_batch(
 
     let results: Vec<f64> = outs
         .into_par_iter()
-        .map(|outcome_state| {
+        .enumerate()
+        .map(|(idx, outcome_state)| {
             estimate_internal(
                 num_qubits,
                 raw,
@@ -195,6 +202,7 @@ pub fn estimate_batch(
                 &qmat,
                 orb_idx,
                 &orb_mats_arr,
+                seed.wrapping_add(idx as u64),
             )
         })
         .collect();

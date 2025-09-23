@@ -2,11 +2,11 @@ use pyo3::prelude::*;
 use numpy::{PyArray1, PyArray2, PyArray3, PyArrayMethods};
 use num_complex::Complex64;
 use rand::Rng;
+use rand::SeedableRng;
+use rand::rngs::SmallRng;
 use rayon::prelude::*;
 use ndarray::{Array2, Array3};
 use std::vec;
-
-// use std::time;
 
 use crate::core::build_v_matrix;
 use crate::core::calculate_expectation;
@@ -25,8 +25,8 @@ pub fn raw_estimate_internal(
     qmat: &Array2<usize>,
     orb_idx: &[i64],
     orb_mats_arr: &Array3<Complex64>,
+    seed: u64,
 ) -> f64 {
-    // let start = std::time::Instant::now();
     let (pre_sin, pre_cos): (Vec<f64>, Vec<f64>) = raw
         .iter()
         .map(|&theta| {
@@ -35,14 +35,20 @@ pub fn raw_estimate_internal(
         })
         .unzip();
 
+    let mut rng = SmallRng::seed_from_u64(seed);
+    let mut rand_buf: Vec<Vec<f64>> = vec![vec![0.0; pre_sin.len()]; trajectory_count];
+    for traj_idx in 0..trajectory_count {
+        for i in 0..pre_sin.len() {
+            rand_buf[traj_idx][i] = rng.random();
+        }
+    }
 
     let sum_alpha: Complex64 = (0..trajectory_count)
         .into_par_iter()
-        .map(|_| {
-            let mut rng = rand::rng();
+        .map(|traj_idx| {
             let mut x_mask: u128 = 0;
             for i in 0..pre_sin.len() {
-                if rng.random::<f64>() < pre_sin[i] / (pre_sin[i] + pre_cos[i]) {
+                if rand_buf[traj_idx][i] < pre_sin[i] / (pre_sin[i] + pre_cos[i]) {
                     x_mask |= 1 << i;
                 }
             }
@@ -80,8 +86,6 @@ pub fn raw_estimate_internal(
         })
         .reduce(|| Complex64::new(0.0, 0.0), |a, b| a + b);
 
-    // let end = std::time::Instant::now();
-    // println!("total computation time (internal) = {}", end.duration_since(start).as_secs_f64());
     let t2 = (trajectory_count * trajectory_count) as f64;
     (sum_alpha.norm_sqr() / t2) * extent
 }
@@ -101,6 +105,7 @@ pub fn raw_estimate_single(
     qubits: &Bound<'_, PyArray2<usize>>,
     orb_indices: &Bound<'_, PyArray1<i64>>,
     orb_mats: &Bound<'_, PyArray3<Complex64>>,
+    seed: u64,
 ) -> PyResult<f64> {
     let raw: &[f64] = unsafe { angles.as_slice()? };
     let gts: &[u8] = unsafe { gate_types.as_slice()? };
@@ -125,6 +130,7 @@ pub fn raw_estimate_single(
             &qmat,
             orb_idx,
             &orb_mats_arr,
+            seed,
         ))
     }
 }
@@ -145,6 +151,7 @@ pub fn raw_estimate_batch(
     qubits: &Bound<'_, PyArray2<usize>>,
     orb_indices: &Bound<'_, PyArray1<i64>>,
     orb_mats: &Bound<'_, PyArray3<Complex64>>,
+    seed: u64,
 ) -> PyResult<Py<PyArray1<f64>>> {
     let raw: &[f64] = unsafe { angles.as_slice()? };
     let gts: &[u8] = unsafe { gate_types.as_slice()? };
@@ -157,7 +164,8 @@ pub fn raw_estimate_batch(
 
     let results: Vec<f64> = outs
         .into_par_iter()
-        .map(|outcome_state| {
+        .enumerate()
+        .map(|(idx, outcome_state)| {
             if initial_state.count_ones() != outcome_state.count_ones() {
                 0.0
             } else {
@@ -174,6 +182,7 @@ pub fn raw_estimate_batch(
                     &qmat,
                     orb_idx,
                     &orb_mats_arr,
+                    seed.wrapping_add(idx as u64),
                 )
             }
         })
@@ -198,6 +207,7 @@ pub fn raw_estimate_reuse(
     qubits: &Bound<'_, PyArray2<usize>>,
     orb_indices: &Bound<'_, PyArray1<i64>>,
     orb_mats: &Bound<'_, PyArray3<Complex64>>,
+    seed: u64,
 ) -> PyResult<Py<PyArray1<f64>>> {
     let raw: &[f64]      = unsafe { angles.as_slice()? };
     let gts: &[u8]       = unsafe { gate_types.as_slice()? };
@@ -214,14 +224,20 @@ pub fn raw_estimate_reuse(
         .map(|&theta| { let t = theta.abs() / 4.0; (t.sin(), t.cos()) })
         .unzip();
 
+    let mut rng = SmallRng::seed_from_u64(seed);
+    let mut rand_buf: Vec<Vec<f64>> = vec![vec![0.0; pre_sin.len()]; trajectory_count];
+    for traj_idx in 0..trajectory_count {
+        for i in 0..pre_sin.len() {
+            rand_buf[traj_idx][i] = rng.random();
+        }
+    }
+
     let accum: Vec<Complex64> = (0..trajectory_count)
         .into_par_iter()
-        .map(|_| {
-
-            let mut rng = rand::rng();
+        .map(|traj_idx| {
             let mut x_mask: u128 = 0;
             for i in 0..pre_sin.len() {
-                if rng.random::<f64>() < pre_sin[i] / (pre_sin[i] + pre_cos[i]) {
+                if rand_buf[traj_idx][i] < pre_sin[i] / (pre_sin[i] + pre_cos[i]) {
                     x_mask |= 1 << i;
                 }
             }

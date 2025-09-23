@@ -1,4 +1,4 @@
-from typing import Union, Sequence
+from typing import Union, Sequence, Optional
 import numpy as np
 from qiskit.circuit import QuantumCircuit
 from . import _lib as _rust
@@ -10,6 +10,7 @@ def estimate(
     outcome_states: Union[int, Sequence[int]],
     epsilon: float,
     delta: float,
+    seed: Optional[int] = None,
 ) -> Union[float, np.ndarray]:
     """
     Estimate probability for one or more outcome states using adaptive Monte Carlo.
@@ -19,6 +20,7 @@ def estimate(
         outcome_states: Single state (int) or sequence of states
         epsilon: Target accuracy
         delta: Confidence parameter
+        seed: Optional seed for reproducible results. If None, a random seed will be used.
         
     Returns:
         Float for single state, ndarray for multiple states.
@@ -38,6 +40,10 @@ def estimate(
     orb_indices = circuit_data.orb_indices
     orb_mats = circuit_data.orb_mats
 
+    if seed is None:
+        import random
+        seed = random.getrandbits(64)
+
     if isinstance(outcome_states, int):
         return _rust.estimate_single(
             num_qubits,
@@ -54,6 +60,7 @@ def estimate(
             qubits,
             orb_indices,
             orb_mats,
+            seed,
         )
     else:
         return _rust.estimate_batch(
@@ -71,4 +78,5 @@ def estimate(
             qubits,
             orb_indices,
             orb_mats,
+            seed,
         )

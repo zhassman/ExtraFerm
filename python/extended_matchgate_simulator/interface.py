@@ -16,6 +16,7 @@ def outcome_probabilities(
     additive_error: Optional[float] = None,
     failure_probability: Optional[float] = None,
     probability_upper_bound: Optional[float] = None,
+    seed: Optional[int] = None,
 ) -> Union[float, np.ndarray]:
     """
     Unified interface for quantum circuit probability calculation using extended matchgate simulation.
@@ -50,6 +51,7 @@ def outcome_probabilities(
         additive_error: Target additive error bound (for estimate/raw estimate)
         failure_probability: Failure probability (for estimate/raw estimate) 
         probability_upper_bound: Upper bound on outcome probability (for raw estimate only)
+        seed: Optional seed for reproducible results. Only valid for Monte Carlo methods (raw estimate/estimate), not exact calculation.
     
     Returns:
         float: Probability for single outcome_states
@@ -67,36 +69,33 @@ def outcome_probabilities(
         
         # Raw estimate with accuracy bounds
         prob = outcome_probabilities(circuit=qc, outcome_states=[0b1010, 0b0101], additive_error=0.01, failure_probability=0.05, probability_upper_bound=0.1)
+        
+        # Reproducible results with seed
+        prob = outcome_probabilities(circuit=qc, outcome_states=0b1010, trajectory_count=10000, seed=42)
     """
     
-    # Parameter validation
     if additive_error is not None and failure_probability is None:
-        raise ValueError("failure_probability is required when additive_error is provided")
+        raise ValueError("Failure_probability is required when additive_error is provided.")
     if failure_probability is not None and additive_error is None:
-        raise ValueError("additive_error is required when failure_probability is provided")
+        raise ValueError("Additive_error is required when failure_probability is provided.")
     if probability_upper_bound is not None and (additive_error is None or failure_probability is None):
-        raise ValueError("probability_upper_bound can only be used with additive_error and failure_probability (for raw estimate)")
+        raise ValueError("Probability_upper_bound can only be used with additive_error and failure_probability (for raw estimate).")
     
-    # Check for conflicting parameter combinations
-    has_trajectory_count = trajectory_count is not None
-    has_accuracy_params = additive_error is not None and failure_probability is not None and probability_upper_bound is not None
-    has_adaptive_params = additive_error is not None and failure_probability is not None and probability_upper_bound is None
-    
-    if has_trajectory_count and has_accuracy_params:
-        raise ValueError("Cannot provide both trajectory_count and (additive_error, failure_probability, probability_upper_bound) - choose one approach")
-    if has_trajectory_count and has_adaptive_params:
-        raise ValueError("Cannot provide both trajectory_count and (additive_error, failure_probability) - choose one approach")
-    if has_accuracy_params and has_adaptive_params:
-        raise ValueError("Cannot provide both (additive_error, failure_probability, probability_upper_bound) and (additive_error, failure_probability) - choose one approach")
+    if trajectory_count is not None and (additive_error is not None or failure_probability is not None or probability_upper_bound is not None):
+        raise ValueError("Cannot provide trajectory_count with any error-related parameters (additive_error, failure_probability, probability_upper_bound). Choose either fixed sampling (trajectory_count) or adaptive sampling (error parameters).")
     
     if trajectory_count is not None and trajectory_count <= 0:
-        raise ValueError("trajectory_count must be positive")
+        raise ValueError("Trajectory_count must be positive.")
     if additive_error is not None and additive_error <= 0:
-        raise ValueError("additive_error must be positive")
+        raise ValueError("Additive_error must be positive.")
     if failure_probability is not None and (failure_probability <= 0 or failure_probability >= 1):
-        raise ValueError("failure_probability must be between 0 and 1")
+        raise ValueError("Failure_probability must be between 0 and 1.")
     if probability_upper_bound is not None and (probability_upper_bound <= 0 or probability_upper_bound > 1):
-        raise ValueError("probability_upper_bound must be between 0 and 1")
+        raise ValueError("Probability_upper_bound must be between 0 and 1.")
+    
+    will_use_exact = (trajectory_count is None and additive_error is None and failure_probability is None)
+    if seed is not None and will_use_exact:
+        raise ValueError("Seed parameter is not valid for exact calculation. Seeds are only applicable to Monte Carlo methods (raw estimate/estimate).")
     
     if trajectory_count is not None or (additive_error is not None and failure_probability is not None and probability_upper_bound is not None):
         if is_lucj(circuit):
@@ -106,7 +105,8 @@ def outcome_probabilities(
                 trajectory_count=trajectory_count,
                 epsilon=additive_error,
                 delta=failure_probability,
-                p=probability_upper_bound
+                p=probability_upper_bound,
+                seed=seed
             )
         else:
             return raw_estimate(
@@ -115,14 +115,16 @@ def outcome_probabilities(
                 trajectory_count=trajectory_count,
                 epsilon=additive_error,
                 delta=failure_probability,
-                p=probability_upper_bound
+                p=probability_upper_bound,
+                seed=seed
             )
     elif additive_error is not None and failure_probability is not None:
         return estimate(
             circuit=circuit,
             outcome_states=outcome_states,
             epsilon=additive_error,
-            delta=failure_probability
+            delta=failure_probability,
+            seed=seed
         )
     else:
         return exact_calculation(

@@ -13,7 +13,8 @@ def raw_estimate(
     epsilon: Optional[float] = None,
     delta:   Optional[float] = None,
     p:       Optional[float] = None,
-    reuse_trajectories: Optional[bool] = False
+    reuse_trajectories: Optional[bool] = False,
+    seed: Optional[int] = None,
 ) -> Union[float, np.ndarray]:
     """
     Monte-Carlo estimate for one or more outcome_states(s). Pass exactly one of:
@@ -26,6 +27,9 @@ def raw_estimate(
     If reuse_trajectories is set to True, then the Rust backend will
     use the same pool of trajectories to calculate probabilities for
     all bitstrings.
+
+    If 'seed' is provided, it will be used to seed the random number generator
+    for reproducible results. If None, a random seed will be used.
 
     Returns a float for a single state, or an ndarray for multiple.
     """
@@ -53,6 +57,10 @@ def raw_estimate(
 
     t = trajectory_count if (trajectory_count is not None) else calculate_trajectory_count(epsilon, delta, p, extent)
     
+    if seed is None:
+        import random
+        seed = random.getrandbits(64)
+    
     if isinstance(outcome_states, int):
         return _rust.raw_estimate_single(
             num_qubits,
@@ -67,6 +75,7 @@ def raw_estimate(
             qubits,
             orb_indices,
             orb_mats,
+            seed,
         )
     else:
         
@@ -84,6 +93,7 @@ def raw_estimate(
                 qubits,
                 orb_indices,
                 orb_mats,
+                seed,
             )
 
         else:
@@ -100,6 +110,7 @@ def raw_estimate(
                 qubits,
                 orb_indices,
                 orb_mats,
+                seed,
             )
 
 
@@ -111,6 +122,7 @@ def raw_estimate_lucj(
     epsilon: Optional[float] = None,
     delta:   Optional[float] = None,
     p:       Optional[float] = None,
+    seed: Optional[int] = None,
 ) -> Union[float, np.ndarray]:
     """
     A version of raw_estimate that is optimized to work for 'lucj'
@@ -125,6 +137,9 @@ def raw_estimate_lucj(
 
     If 'trajectory_count' is provided, it is used directly.
     Otherwise it's computed from (epsilon,delta,p,extent).
+
+    If 'seed' is provided, it will be used to seed the random number generator
+    for reproducible results. If None, a random seed will be used.
 
     Returns a float for a single state, or an ndarray for multiple.
     """
@@ -150,6 +165,10 @@ def raw_estimate_lucj(
         )
 
     t = trajectory_count if (trajectory_count is not None) else calculate_trajectory_count(epsilon, delta, p, extent)
+    
+    if seed is None:
+        import random
+        seed = random.getrandbits(64)
 
     if isinstance(outcome_states, int):
         return _rust.raw_estimate_lucj_single(
@@ -165,6 +184,7 @@ def raw_estimate_lucj(
                 qubits,
                 orb_indices,
                 orb_mats,
+                seed,
             )
     else:
         return _rust.raw_estimate_lucj_batch(
@@ -180,4 +200,5 @@ def raw_estimate_lucj(
                 qubits,
                 orb_indices,
                 orb_mats,
+                seed,
             )

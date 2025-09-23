@@ -24,6 +24,7 @@ pub fn raw_estimate_lucj_internal(
     qmat: &Array2<usize>,
     orb_idx: &[i64],
     orb_mats_arr: &Array3<Complex64>,
+    seed: u64,
 ) -> f64 {
 
     let u: Array2<Complex64> = orb_mats_arr.index_axis(Axis(0), orb_idx[0].try_into().unwrap()).to_owned();
@@ -91,7 +92,7 @@ pub fn raw_estimate_lucj_internal(
         .map(|(s, c)| s / (s + c))
         .collect();
 
-    let mut rng = SmallRng::from_os_rng();
+    let mut rng = SmallRng::seed_from_u64(seed);
     let mut rand_buf: Vec<u64> = vec![0u64; probs.len()];
     const INV_U64: f64 = 1.0 / ((u64::MAX as f64) + 1.0);
 
@@ -183,6 +184,7 @@ pub fn raw_estimate_lucj_single(
     qubits: &Bound<'_, PyArray2<usize>>,
     orb_indices: &Bound<'_, PyArray1<i64>>,
     orb_mats: &Bound<'_, PyArray3<Complex64>>,
+    seed: u64,
 ) -> PyResult<f64> {
     let raw: &[f64] = unsafe { angles.as_slice()? };
     let gts: &[u8] = unsafe { gate_types.as_slice()? };
@@ -206,6 +208,7 @@ pub fn raw_estimate_lucj_single(
             &qmat,
             orb_idx,
             &orb_mats_arr,
+            seed,
         ))
     }
 }
@@ -226,6 +229,7 @@ pub fn raw_estimate_lucj_batch(
     qubits: &Bound<'_, PyArray2<usize>>,
     orb_indices: &Bound<'_, PyArray1<i64>>,
     orb_mats: &Bound<'_, PyArray3<Complex64>>,
+    seed: u64,
 ) -> PyResult<Py<PyArray1<f64>>> {
     let raw: &[f64] = unsafe { angles.as_slice()? };
     let gts: &[u8] = unsafe { gate_types.as_slice()? };
@@ -238,7 +242,8 @@ pub fn raw_estimate_lucj_batch(
 
     let results: Vec<f64> = outs
         .into_par_iter()
-        .map(|outcome_state| {
+        .enumerate()
+        .map(|(idx, outcome_state)| {
             if initial_state.count_ones() != outcome_state.count_ones() {
                 0.0
             } else {
@@ -255,6 +260,7 @@ pub fn raw_estimate_lucj_batch(
                     &qmat,
                     orb_idx,
                     &orb_mats_arr,
+                    seed.wrapping_add(idx as u64),
                 )
             }
         })
