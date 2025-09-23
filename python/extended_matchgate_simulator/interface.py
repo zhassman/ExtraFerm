@@ -1,6 +1,6 @@
 from .exact import exact_calculation
 from .raw_estimation import raw_estimate
-from .raw_estimation_lucj import raw_estimate_lucj
+from .raw_estimation import raw_estimate_lucj
 from .utils import is_lucj
 from .estimation import estimate
 from typing import Union, Optional, Sequence
