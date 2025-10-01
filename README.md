@@ -9,7 +9,7 @@ This library can be used to estimate the Born-rule probability of measurement ou
 
 ## Circuit Extent
 
-Our simulator runs most efficiently when the circuit’s **extent** is small. The extent is defined as:
+Our simulator runs most efficiently when the circuit’s **extent** is close to one. The extent is defined as:
 
 $$
 \xi^* = \prod_{j=1}^k \bigl(\cos(\theta_j/4) + \sin(\theta_j/4)\bigr)^2
