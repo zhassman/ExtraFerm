@@ -3,10 +3,10 @@ requires = ["maturin>=1.0,<2.0"]
 build-backend = "maturin"
 
 [project]
-name = "extended-matchgate-simulator"
+name = "ExtraFerm"
 requires-python = ">=3.11"
 version = "0.1.0"
-description = "Quantum circuit simulator for particle-number conserving extended matchgate circuits"
+description = "Quantum circuit simulator for particle number conserving extended matchgate circuits"
 readme = "README.md"
 license = { file = "LICENSE" }
 
@@ -26,7 +26,7 @@ dev = [
 [tool.maturin]
 features = ["pyo3/extension-module"]
 python-source = "python"
-module-name = "extended_matchgate_simulator._lib"
+module-name = "ExtraFerm._lib"
 
 [tool.ruff]
 src = ["python"]

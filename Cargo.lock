@@ -3,6 +3,19 @@
 version = 4
 
 [[package]]
+name = "ExtraFerm"
+version = "0.1.0"
+dependencies = [
+ "ndarray",
+ "ndarray-linalg",
+ "num-complex",
+ "numpy",
+ "pyo3",
+ "rand 0.9.2",
+ "rayon",
+]
+
+[[package]]
 name = "adler2"
 version = "2.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -317,19 +330,6 @@ checksum = "39cab71617ae0d63f51a36d69f866391735b51691dbda63cf6f96d042b63efeb"
 dependencies = [
  "libc",
  "windows-sys 0.61.0",
-]
-
-[[package]]
-name = "extended-matchgate-simulator"
-version = "0.1.0"
-dependencies = [
- "ndarray",
- "ndarray-linalg",
- "num-complex",
- "numpy",
- "pyo3",
- "rand 0.9.2",
- "rayon",
 ]
 
 [[package]]

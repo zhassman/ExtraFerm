@@ -1,4 +1,4 @@
-"""Passive extended matchgate quantum circuit simulator."""
+"""Particle number conserving extended matchgate quantum circuit simulator."""
 
 from .interface import outcome_probabilities
 

@@ -19,7 +19,7 @@ def outcome_probabilities(
     seed: Optional[int] = None,
 ) -> Union[float, np.ndarray]:
     """
-    Unified interface for quantum circuit probability calculation using extended matchgate simulation.
+    Unified interface for Born rule probability calculation using extended matchgate simulation.
     
     This function automatically selects the appropriate simulation algorithm based on the
     provided parameters, offering three different approaches for calculating outcome probabilities:
