@@ -1,4 +1,4 @@
-# Extended Matchgate Simulator
+# ExtraFerm
 
 ## Overview
 
