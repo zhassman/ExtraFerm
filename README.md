@@ -55,9 +55,8 @@ print(probs)
 qc.draw("mpl", scale=0.8, fold=-1)
 ```
 
-### Output
-
 [5.09355260e-01 1.56195696e-33 8.07714813e-02]
+
 ![Quantum Circuit](tutorials/circuit.png)
 
 
