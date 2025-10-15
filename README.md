@@ -47,7 +47,10 @@ qc.append(XXPlusYYGate(theta=angles[10], beta=angles[11]), [0, 1])
 
 from extraferm import outcome_probabilities
 bitstrings = [0b0101, 0b1100, 0b0011]
-probs = outcome_probabilities(circuit=qc, outcome_states=bitstrings, trajectory_count=100_000, seed=seed)
+probs = outcome_probabilities(circuit=qc, 
+                              outcome_states=bitstrings, 
+                              trajectory_count=100_000, 
+                              seed=seed)
 
 # Show results
 
