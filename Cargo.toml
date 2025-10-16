@@ -1,12 +1,12 @@
 [package]
-name = "ExtraFerm"
+name = "extraferm"
 version = "0.1.0"
 edition = "2021"
 description = "Quantum circuit simulator for particle number conserving extended matchgate circuits"
 license = "MIT OR Apache-2.0"
 
 [lib]
-name = "ExtraFerm"
+name = "extraferm"
 crate-type = ["cdylib"]
 
 [dependencies]

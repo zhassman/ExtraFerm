@@ -26,7 +26,7 @@ dev = [
 [tool.maturin]
 features = ["pyo3/extension-module"]
 python-source = "python"
-module-name = "ExtraFerm._lib"
+module-name = "extraferm._lib"
 
 [tool.ruff]
 src = ["python"]
