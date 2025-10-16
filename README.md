@@ -1,5 +1,9 @@
 # ExtraFerm
 
+```bash
+pip install extraferm
+```
+
 ## Overview
 
 This library can be used to estimate Born rule probabilities of measurement outcomes from particle-number conserving extended matchgate circuits:
@@ -62,13 +66,3 @@ qc.draw("mpl", scale=0.8, fold=-1)
 
 ![Quantum Circuit](tutorials/circuit.png)
 
-
-## Setup
-
-Install this repository
-
-```bash
-git clone https://github.com/zhassman/Extended-Matchgate-Simulator.git
-cd Extended-Matchgate-Simulator
-pip install -e .
-```
