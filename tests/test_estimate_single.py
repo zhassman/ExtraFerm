@@ -1,12 +1,12 @@
 import math
 import pytest
 from numpy.testing import assert_allclose
-from extended_matchgate_simulator.estimation import estimate
-from extended_matchgate_simulator.utils import (
+from extraferm.estimation import estimate
+from extraferm.utils import (
     ucj_to_compatible,
     ucj_to_compatible_fully_reduced,
 )
-from extended_matchgate_simulator.utils_dev import (
+from extraferm.utils_dev import (
     get_bitstrings_and_probs,
     make_parameterized_controlled_phase_circuit
 )
