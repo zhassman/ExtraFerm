@@ -84,7 +84,8 @@ def extract_circuit_data(circuit: QuantumCircuit) -> CircuitData:
         if name == "x":
             if seen_non_x:
                 raise ValueError(
-                    "All X gates must appear consecutively at the beginning of the circuit."
+                    "All X gates must appear consecutively at the beginning of the "
+                    "circuit."
                 )
             q = instr.qubits[0]._index
             initial_state |= 1 << q

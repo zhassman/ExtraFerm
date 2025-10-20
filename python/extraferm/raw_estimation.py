@@ -37,7 +37,8 @@ def raw_estimate(
     """
     if reuse_trajectories and isinstance(outcome_states, int):
         raise ValueError(
-            "'reuse_trajectories=True' only makes sense when 'outcome_states' is a sequence"
+            "'reuse_trajectories=True' only makes sense when 'outcome_states' is a "
+            "sequence"
         )
 
     circuit_data = extract_circuit_data(circuit)
@@ -56,7 +57,8 @@ def raw_estimate(
     accuracy_args = (epsilon is not None) and (delta is not None) and (p is not None)
     if (trajectory_count is None) == (not accuracy_args):
         raise ValueError(
-            "Must pass either 'trajectory_count' or all of 'epsilon, delta, p' but not both."
+            "Must pass either 'trajectory_count' or all of 'epsilon, delta, p' but not "
+            "both."
         )
 
     t = (
@@ -169,7 +171,8 @@ def raw_estimate_lucj(
     accuracy_args = (epsilon is not None) and (delta is not None) and (p is not None)
     if (trajectory_count is None) == (not accuracy_args):
         raise ValueError(
-            "Must pass either 'trajectory_count' or all of 'epsilon, delta, p' but not both."
+            "Must pass either 'trajectory_count' or all of 'epsilon, delta, p' but not "
+            "both."
         )
 
     t = (
