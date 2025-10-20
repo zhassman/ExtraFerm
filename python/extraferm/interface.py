@@ -20,36 +20,36 @@ def outcome_probabilities(
     seed: Optional[int] = None,
 ) -> Union[float, np.ndarray]:
     """
-    Unified interface for Born rule probability calculation using extended matchgate 
+    Unified interface for Born rule probability calculation using extended matchgate
     simulation.
 
-    This function automatically selects the appropriate simulation algorithm based on 
-    the provided parameters, offering three different approaches for calculating 
+    This function automatically selects the appropriate simulation algorithm based on
+    the provided parameters, offering three different approaches for calculating
     outcome probabilities:
 
     **Algorithm Selection:**
 
     1. **Raw Estimate**: Fixed Monte Carlo sampling with optional trajectory count.
-       - Use when: You want to calculate probabilities for a large number of bitstrings 
+       - Use when: You want to calculate probabilities for a large number of bitstrings
        quickly
-       - Parameters: Provide either trajectory_count OR (additive_error, 
+       - Parameters: Provide either trajectory_count OR (additive_error,
        failure_probability, probability_upper_bound)
        - Performance: Fastest for multiple bitstrings - O(trajectory_count)
 
     2. **Estimate**: Uses adaptive calls to Raw Estiamte with theoretical error bounds.
        - Use when: You want very high accuracy for fewer bitstrings
        - Parameters: Provide additive_error and failure_probability
-       - Performance: Adaptive - automatically determines sample size for guaranteed 
+       - Performance: Adaptive - automatically determines sample size for guaranteed
        accuracy
 
-    3. **Exact Calculation**: Returns exact probabilities by summing over all 
+    3. **Exact Calculation**: Returns exact probabilities by summing over all
     controlled-phase masks.
        - Use when: You need exact results and the circuit is small enough
        - Parameters: Only circuit and outcome_states required
        - Performance: O(2^k) where k is the number of controlled-phase gates
 
     **Automatic Optimizations:**
-    - LUCJ circuits (pauli_x*, orb_rot_jw, controlled-phase, orb_rot_jw pattern) have 
+    - LUCJ circuits (pauli_x*, orb_rot_jw, controlled-phase, orb_rot_jw pattern) have
     optimized paths.
 
     Args:
@@ -58,7 +58,7 @@ def outcome_probabilities(
         trajectory_count: Fixed number of Monte Carlo trajectories (for raw estimate)
         additive_error: Target additive error bound (for estimate/raw estimate)
         failure_probability: Failure probability (for estimate/raw estimate)
-        probability_upper_bound: Upper bound on outcome probability (for raw estimate 
+        probability_upper_bound: Upper bound on outcome probability (for raw estimate
         only)
         seed: Optional seed for reproducible results. Only valid for Monte Carlo methods
         (raw estimate/estimate), not exact calculation.
@@ -72,27 +72,27 @@ def outcome_probabilities(
         prob = outcome_probabilities(circuit=qc, outcome_states=0b1010)
 
         # Adaptive estimate with error bounds
-        prob = outcome_probabilities(circuit=qc, 
-                                     outcome_states=[0b1010, 0b0101], 
-                                     additive_error=0.01, 
+        prob = outcome_probabilities(circuit=qc,
+                                     outcome_states=[0b1010, 0b0101],
+                                     additive_error=0.01,
                                      failure_probability=0.05)
 
         # Raw estimate with fixed trajectory count
-        prob = outcome_probabilities(circuit=qc, 
-                                     outcome_states=0b1010, 
+        prob = outcome_probabilities(circuit=qc,
+                                     outcome_states=0b1010,
                                      trajectory_count=10000)
 
         # Raw estimate with accuracy bounds
-        prob = outcome_probabilities(circuit=qc, 
-                                     outcome_states=[0b1010, 0b0101], 
-                                     additive_error=0.01, 
-                                     failure_probability=0.05, 
+        prob = outcome_probabilities(circuit=qc,
+                                     outcome_states=[0b1010, 0b0101],
+                                     additive_error=0.01,
+                                     failure_probability=0.05,
                                      probability_upper_bound=0.1)
 
         # Reproducible results with seed
-        prob = outcome_probabilities(circuit=qc, 
-                                     outcome_states=0b1010, 
-                                     trajectory_count=10000, 
+        prob = outcome_probabilities(circuit=qc,
+                                     outcome_states=0b1010,
+                                     trajectory_count=10000,
                                      seed=42)
     """
 

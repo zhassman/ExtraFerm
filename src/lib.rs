@@ -1,7 +1,4 @@
 #![allow(clippy::too_many_arguments)]
-#![allow(clippy::unnecessary_cast)]
-#![allow(clippy::needless_range_loop)]
-#![allow(clippy::single_match)]
 
 mod core;
 mod estimation;

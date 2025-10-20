@@ -36,9 +36,9 @@ pub fn raw_estimate_internal(
 
     let mut rng = SmallRng::seed_from_u64(seed);
     let mut rand_buf: Vec<Vec<f64>> = vec![vec![0.0; pre_sin.len()]; trajectory_count];
-    for traj_idx in 0..trajectory_count {
-        for i in 0..pre_sin.len() {
-            rand_buf[traj_idx][i] = rng.random();
+    for traj in &mut rand_buf {
+        for val in traj {
+            *val = rng.random();
         }
     }
 
@@ -222,9 +222,9 @@ pub fn raw_estimate_reuse(
 
     let mut rng = SmallRng::seed_from_u64(seed);
     let mut rand_buf: Vec<Vec<f64>> = vec![vec![0.0; pre_sin.len()]; trajectory_count];
-    for traj_idx in 0..trajectory_count {
-        for i in 0..pre_sin.len() {
-            rand_buf[traj_idx][i] = rng.random();
+    for traj in &mut rand_buf {
+        for val in traj {
+            *val = rng.random();
         }
     }
 

@@ -53,19 +53,16 @@ pub fn raw_estimate_lucj_internal(
 
     let mut cp_idx = 0;
     for (k, &gt) in gts.iter().enumerate() {
-        match gt {
-            1 => {
-                let theta = raw[cp_idx];
-                let q1 = qmat[(k, 0)];
-                let q2 = qmat[(k, 1)];
-                let phase = Complex64::from_polar(1.0, theta * 0.5);
-                let mut r1 = u_subview.index_axis_mut(Axis(0), q1);
-                r1 *= phase;
-                let mut r2 = u_subview.index_axis_mut(Axis(0), q2);
-                r2 *= phase;
-                cp_idx += 1;
-            }
-            _ => {}
+        if gt == 1 {
+            let theta = raw[cp_idx];
+            let q1 = qmat[(k, 0)];
+            let q2 = qmat[(k, 1)];
+            let phase = Complex64::from_polar(1.0, theta * 0.5);
+            let mut r1 = u_subview.index_axis_mut(Axis(0), q1);
+            r1 *= phase;
+            let mut r2 = u_subview.index_axis_mut(Axis(0), q2);
+            r2 *= phase;
+            cp_idx += 1;
         }
     }
 
@@ -123,17 +120,14 @@ pub fn raw_estimate_lucj_internal(
         let mut diag_mask: u128 = 0;
         let mut cp_idx: i64 = 0;
         for (k, &gt) in gts.iter().enumerate() {
-            match gt {
-                1 => {
-                    let q1 = qmat[(k, 0)];
-                    let q2 = qmat[(k, 1)];
-                    if (x_mask >> cp_idx) & 1 == 1 {
-                        diag_mask ^= 1 << q1;
-                        diag_mask ^= 1 << q2;
-                    }
-                    cp_idx += 1;
+            if gt == 1 {
+                let q1 = qmat[(k, 0)];
+                let q2 = qmat[(k, 1)];
+                if (x_mask >> cp_idx) & 1 == 1 {
+                    diag_mask ^= 1 << q1;
+                    diag_mask ^= 1 << q2;
                 }
-                _ => {}
+                cp_idx += 1;
             }
         }
         x_masks_diags.insert(x_mask, diag_mask);

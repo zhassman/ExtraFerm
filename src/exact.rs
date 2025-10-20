@@ -58,7 +58,7 @@ pub fn exact_calculation(
                 let v = build_v_matrix(
                     num_qubits,
                     raw,
-                    mask as u128,
+                    mask,
                     gts,
                     &pmat,
                     &qmat,

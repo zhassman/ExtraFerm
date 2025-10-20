@@ -23,7 +23,7 @@ def estimate(
         outcome_states: Single state (int) or sequence of states
         epsilon: Target accuracy
         delta: Confidence parameter
-        seed: Optional seed for reproducible results. If None, a random seed will be 
+        seed: Optional seed for reproducible results. If None, a random seed will be
         used.
 
     Returns:
