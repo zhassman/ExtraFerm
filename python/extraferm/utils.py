@@ -122,10 +122,10 @@ def extract_circuit_data(circuit: QuantumCircuit) -> CircuitData:
             params.append([0.0, 0.0])
             qubits.append([0, 0])
             orb_indices.append(len(orb_mats))
-            A = np.asarray(instr.operation.orbital_rotation_a, dtype=np.complex128)
-            B = np.asarray(instr.operation.orbital_rotation_b, dtype=np.complex128)
-            M = block_diag(A, B)
-            orb_mats.append(M)
+            a = np.asarray(instr.operation.orbital_rotation_a, dtype=np.complex128)
+            b = np.asarray(instr.operation.orbital_rotation_b, dtype=np.complex128)
+            m = block_diag(a, b)
+            orb_mats.append(m)
 
         else:
             raise ValueError(f"Unexpected gate '{name}' in circuit.")
