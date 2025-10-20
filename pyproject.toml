@@ -22,7 +22,6 @@ dev = [
   "maturin>=1.0",
   "ffsim>=0.0.60",
   "ruff",
-  "mypy"
 ]
 
 [tool.maturin]
