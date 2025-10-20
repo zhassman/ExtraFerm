@@ -1,16 +1,15 @@
-use pyo3::prelude::*;
-use numpy::{PyArray1, PyArray2, PyArray3, PyArrayMethods};
+use ndarray::{Array2, Array3};
 use num_complex::Complex64;
+use numpy::{PyArray1, PyArray2, PyArray3, PyArrayMethods};
+use pyo3::prelude::*;
+use rand::rngs::SmallRng;
 use rand::Rng;
 use rand::SeedableRng;
-use rand::rngs::SmallRng;
 use rayon::prelude::*;
-use ndarray::{Array2, Array3};
 use std::vec;
 
 use crate::core::build_v_matrix;
 use crate::core::calculate_expectation;
-
 
 pub fn raw_estimate_internal(
     num_qubits: usize,
@@ -53,7 +52,6 @@ pub fn raw_estimate_internal(
                 }
             }
 
-
             let v_mat = build_v_matrix(
                 num_qubits,
                 raw,
@@ -65,9 +63,7 @@ pub fn raw_estimate_internal(
                 orb_mats_arr,
             );
 
-
             let amp = calculate_expectation(&v_mat, initial_state, outcome_state);
-
 
             let j_phase = match x_mask.count_ones() % 4 {
                 0 => Complex64::new(1.0, 0.0),
@@ -89,7 +85,6 @@ pub fn raw_estimate_internal(
     let t2 = (trajectory_count * trajectory_count) as f64;
     (sum_alpha.norm_sqr() / t2) * extent
 }
-
 
 #[pyfunction]
 pub fn raw_estimate_single(
@@ -134,7 +129,6 @@ pub fn raw_estimate_single(
         ))
     }
 }
-
 
 #[pyfunction]
 pub fn raw_estimate_batch(
@@ -191,7 +185,6 @@ pub fn raw_estimate_batch(
     Ok(PyArray1::from_vec(py, results).to_owned().into())
 }
 
-
 #[pyfunction]
 pub fn raw_estimate_reuse(
     py: Python,
@@ -209,19 +202,22 @@ pub fn raw_estimate_reuse(
     orb_mats: &Bound<'_, PyArray3<Complex64>>,
     seed: u64,
 ) -> PyResult<Py<PyArray1<f64>>> {
-    let raw: &[f64]      = unsafe { angles.as_slice()? };
-    let gts: &[u8]       = unsafe { gate_types.as_slice()? };
-    let pmat             = unsafe { params.as_array().to_owned() };
-    let qmat             = unsafe { qubits.as_array().to_owned() };
-    let orb_idx: &[i64]  = unsafe { orb_indices.as_slice()? };
-    let orb_mats_arr     = unsafe { orb_mats.as_array().to_owned() };
+    let raw: &[f64] = unsafe { angles.as_slice()? };
+    let gts: &[u8] = unsafe { gate_types.as_slice()? };
+    let pmat = unsafe { params.as_array().to_owned() };
+    let qmat = unsafe { qubits.as_array().to_owned() };
+    let orb_idx: &[i64] = unsafe { orb_indices.as_slice()? };
+    let orb_mats_arr = unsafe { orb_mats.as_array().to_owned() };
 
     let outs: Vec<u128> = outcome_states.extract()?;
     let n_out = outs.len();
 
     let (pre_sin, pre_cos): (Vec<f64>, Vec<f64>) = raw
         .iter()
-        .map(|&theta| { let t = theta.abs() / 4.0; (t.sin(), t.cos()) })
+        .map(|&theta| {
+            let t = theta.abs() / 4.0;
+            (t.sin(), t.cos())
+        })
         .unzip();
 
     let mut rng = SmallRng::seed_from_u64(seed);
@@ -243,8 +239,14 @@ pub fn raw_estimate_reuse(
             }
 
             let v_mat = build_v_matrix(
-                num_qubits, raw, x_mask, gts,
-                &pmat, &qmat, orb_idx, &orb_mats_arr
+                num_qubits,
+                raw,
+                x_mask,
+                gts,
+                &pmat,
+                &qmat,
+                orb_idx,
+                &orb_mats_arr,
             );
 
             outs.par_iter()
@@ -262,13 +264,14 @@ pub fn raw_estimate_reuse(
                         };
                         let sign = if (negative_mask & x_mask).count_ones() % 2 == 1 {
                             -1.0
-                        } else { 1.0 };
+                        } else {
+                            1.0
+                        };
                         j_phase * amp * sign
                     }
                 })
                 .collect::<Vec<_>>()
         })
-
         .reduce(
             || vec![Complex64::new(0.0, 0.0); n_out],
             |mut acc, vec| {
@@ -276,7 +279,7 @@ pub fn raw_estimate_reuse(
                     *a += c;
                 }
                 acc
-            }
+            },
         );
 
     let norm = (trajectory_count * trajectory_count) as f64;

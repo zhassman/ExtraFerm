@@ -1,15 +1,14 @@
-use pyo3::prelude::*;
-use numpy::{PyArray1, PyArray2, PyArray3, PyArrayMethods};
-use num_complex::Complex64;
-use rand::Rng;
-use rayon::prelude::*;
-use ndarray::{Array2, Array3, Axis, s};
+use ndarray::{s, Array2, Array3, Axis};
 use ndarray_linalg::Determinant;
+use num_complex::Complex64;
+use numpy::{PyArray1, PyArray2, PyArray3, PyArrayMethods};
+use pyo3::prelude::*;
+use rand::rngs::SmallRng;
+use rand::Rng;
+use rand::SeedableRng;
+use rayon::prelude::*;
 use std::collections::HashMap;
 use std::collections::HashSet;
-use rand::SeedableRng;
-use rand::rngs::SmallRng;
-
 
 pub fn raw_estimate_lucj_internal(
     num_qubits: usize,
@@ -26,9 +25,12 @@ pub fn raw_estimate_lucj_internal(
     orb_mats_arr: &Array3<Complex64>,
     seed: u64,
 ) -> f64 {
-
-    let u: Array2<Complex64> = orb_mats_arr.index_axis(Axis(0), orb_idx[0].try_into().unwrap()).to_owned();
-    let v: Array2<Complex64> = orb_mats_arr.index_axis(Axis(0), orb_idx[orb_idx.len()-1].try_into().unwrap()).to_owned();
+    let u: Array2<Complex64> = orb_mats_arr
+        .index_axis(Axis(0), orb_idx[0].try_into().unwrap())
+        .to_owned();
+    let v: Array2<Complex64> = orb_mats_arr
+        .index_axis(Axis(0), orb_idx[orb_idx.len() - 1].try_into().unwrap())
+        .to_owned();
 
     let mut u_desired_cols: Vec<usize> = Vec::new();
     let mut v_desired_rows: Vec<usize> = Vec::new();
@@ -69,7 +71,8 @@ pub fn raw_estimate_lucj_internal(
 
     let base_mat = v_subview.dot(&u_subview);
 
-    let mut corrections: Array3<Complex64> = Array3::zeros((num_qubits, num_fermions, num_fermions));
+    let mut corrections: Array3<Complex64> =
+        Array3::zeros((num_qubits, num_fermions, num_fermions));
     for i in 0..num_qubits {
         let u_row_vec = u_subview.index_axis(Axis(0), i);
         let v_col_vec = v_subview.index_axis(Axis(1), i);
@@ -108,7 +111,9 @@ pub fn raw_estimate_lucj_internal(
         }
         match x_masks_counts.get_mut(&x_mask) {
             Some(count) => *count += 1,
-            None => { x_masks_counts.insert(x_mask, 1); }
+            None => {
+                x_masks_counts.insert(x_mask, 1);
+            }
         }
     }
 
@@ -160,7 +165,11 @@ pub fn raw_estimate_lucj_internal(
                 3 => Complex64::new(0.0, -1.0),
                 _ => unreachable!(),
             };
-            let sign = if (negative_mask & x_mask).count_ones() % 2 == 1 { -1.0 } else { 1.0 };
+            let sign = if (negative_mask & x_mask).count_ones() % 2 == 1 {
+                -1.0
+            } else {
+                1.0
+            };
             j_phase * amp * sign * count
         })
         .sum();
@@ -168,7 +177,6 @@ pub fn raw_estimate_lucj_internal(
     let t2 = (trajectory_count * trajectory_count) as f64;
     (sum_alpha.norm_sqr() / t2) * extent
 }
-
 
 #[pyfunction]
 pub fn raw_estimate_lucj_single(
@@ -212,7 +220,6 @@ pub fn raw_estimate_lucj_single(
         ))
     }
 }
-
 
 #[pyfunction]
 pub fn raw_estimate_lucj_batch(

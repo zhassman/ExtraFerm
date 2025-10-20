@@ -1,8 +1,7 @@
-use num_complex::Complex64;
 use ndarray::{Array2, Array3, ArrayBase, Axis, Data, Ix2};
 use ndarray_linalg::Determinant;
+use num_complex::Complex64;
 use std::f64::consts::PI;
-
 
 pub fn calculate_expectation<S>(
     v: &ArrayBase<S, Ix2>,
@@ -55,7 +54,6 @@ where
     sub.det().unwrap_or(Complex64::new(0.0, 0.0))
 }
 
-
 #[inline(always)]
 pub fn build_v_matrix(
     num_qubits: usize,
@@ -73,7 +71,6 @@ pub fn build_v_matrix(
     for (k, &gt) in gts.iter().enumerate() {
         match gt {
             1 => {
-
                 let theta = raw[cp_idx];
                 let q1 = qmat[(k, 0)];
                 let q2 = qmat[(k, 1)];
@@ -90,7 +87,7 @@ pub fn build_v_matrix(
             }
             2 => {
                 let theta = pmat[(k, 0)];
-                let beta  = pmat[(k, 1)];
+                let beta = pmat[(k, 1)];
                 let q1 = qmat[(k, 0)];
                 let q2 = qmat[(k, 1)];
 
