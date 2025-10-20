@@ -17,14 +17,14 @@ def estimate(
 ) -> Union[float, np.ndarray]:
     """
     Estimate probability for one or more outcome states using adaptive Monte Carlo.
-    
+
     Args:
         circuit: QuantumCircuit object
         outcome_states: Single state (int) or sequence of states
         epsilon: Target accuracy
         delta: Confidence parameter
         seed: Optional seed for reproducible results. If None, a random seed will be used.
-        
+
     Returns:
         Float for single state, ndarray for multiple states.
         Multiple states are computed in parallel for efficiency.
@@ -45,6 +45,7 @@ def estimate(
 
     if seed is None:
         import random
+
         seed = random.getrandbits(64)
 
     if isinstance(outcome_states, int):

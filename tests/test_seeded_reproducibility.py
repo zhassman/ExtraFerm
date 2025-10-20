@@ -18,7 +18,7 @@ def test_raw_estimate_batch_reproducibility():
     mean = 0
     circuit = make_parameterized_controlled_phase_circuit(norb, nelec, mean, var)
     bitstrings, _ = get_bitstrings_and_probs(circuit, norb, nelec)
-    
+
     probs1 = raw_estimate(
         circuit=ucj_to_compatible(circuit),
         outcome_states=bitstrings,
@@ -35,7 +35,7 @@ def test_raw_estimate_batch_reproducibility():
         p=p,
         seed=42,
     )
-    
+
     assert_allclose(probs1, probs2, rtol=0, atol=1e-12)
 
 
@@ -46,7 +46,7 @@ def test_raw_estimate_single_reproducibility():
     mean = 0
     circuit = make_parameterized_controlled_phase_circuit(norb, nelec, mean, var)
     bitstrings, _ = get_bitstrings_and_probs(circuit, norb, nelec)
-    
+
     probs1 = [
         raw_estimate(
             circuit=ucj_to_compatible(circuit),
@@ -69,7 +69,7 @@ def test_raw_estimate_single_reproducibility():
         )
         for b in bitstrings
     ]
-    
+
     assert_allclose(probs1, probs2, rtol=0, atol=1e-12)
 
 
@@ -80,7 +80,7 @@ def test_raw_estimate_lucj_batch_reproducibility():
     mean = 0
     circuit = make_parameterized_controlled_phase_circuit(norb, nelec, mean, var)
     bitstrings, _ = get_bitstrings_and_probs(circuit, norb, nelec)
-    
+
     probs1 = raw_estimate_lucj(
         circuit=ucj_to_compatible(circuit),
         outcome_states=bitstrings,
@@ -97,7 +97,7 @@ def test_raw_estimate_lucj_batch_reproducibility():
         p=p,
         seed=42,
     )
-    
+
     assert_allclose(probs1, probs2, rtol=0, atol=1e-12)
 
 
@@ -108,7 +108,7 @@ def test_raw_estimate_lucj_single_reproducibility():
     mean = 0
     circuit = make_parameterized_controlled_phase_circuit(norb, nelec, mean, var)
     bitstrings, _ = get_bitstrings_and_probs(circuit, norb, nelec)
-    
+
     probs1 = [
         raw_estimate_lucj(
             circuit=ucj_to_compatible(circuit),
@@ -131,7 +131,7 @@ def test_raw_estimate_lucj_single_reproducibility():
         )
         for b in bitstrings
     ]
-    
+
     assert_allclose(probs1, probs2, rtol=0, atol=1e-12)
 
 
@@ -142,7 +142,7 @@ def test_raw_estimate_reuse_reproducibility():
     mean = 0
     circuit = make_parameterized_controlled_phase_circuit(norb, nelec, mean, var)
     bitstrings, _ = get_bitstrings_and_probs(circuit, norb, nelec)
-    
+
     probs1 = raw_estimate(
         circuit=ucj_to_compatible(circuit),
         outcome_states=bitstrings,
@@ -161,7 +161,7 @@ def test_raw_estimate_reuse_reproducibility():
         reuse_trajectories=True,
         seed=42,
     )
-    
+
     assert_allclose(probs1, probs2, rtol=0, atol=1e-12)
 
 
@@ -172,7 +172,7 @@ def test_estimate_batch_reproducibility():
     mean = 0
     circuit = make_parameterized_controlled_phase_circuit(norb, nelec, mean, var)
     bitstrings, _ = get_bitstrings_and_probs(circuit, norb, nelec)
-    
+
     probs1 = estimate(
         circuit=ucj_to_compatible(circuit),
         outcome_states=bitstrings,
@@ -187,7 +187,7 @@ def test_estimate_batch_reproducibility():
         delta=delta,
         seed=42,
     )
-    
+
     assert_allclose(probs1, probs2, rtol=0, atol=1e-12)
 
 
@@ -198,7 +198,7 @@ def test_estimate_single_reproducibility():
     mean = 0
     circuit = make_parameterized_controlled_phase_circuit(norb, nelec, mean, var)
     bitstrings, _ = get_bitstrings_and_probs(circuit, norb, nelec)
-    
+
     probs1 = [
         estimate(
             circuit=ucj_to_compatible(circuit),
@@ -219,7 +219,7 @@ def test_estimate_single_reproducibility():
         )
         for b in bitstrings
     ]
-    
+
     assert_allclose(probs1, probs2, rtol=0, atol=1e-12)
 
 
@@ -229,7 +229,7 @@ def test_outcome_probabilities_reproducibility():
     mean = 0
     circuit = make_parameterized_controlled_phase_circuit(norb, nelec, mean, var)
     bitstrings, _ = get_bitstrings_and_probs(circuit, norb, nelec)
-    
+
     probs1 = outcome_probabilities(
         circuit=ucj_to_compatible(circuit),
         outcome_states=bitstrings,
@@ -242,7 +242,7 @@ def test_outcome_probabilities_reproducibility():
         trajectory_count=1000,
         seed=42,
     )
-    
+
     assert_allclose(probs1, probs2, rtol=0, atol=1e-12)
 
 
@@ -253,7 +253,7 @@ def test_different_seeds_produce_different_results():
     mean = 0
     circuit = make_parameterized_controlled_phase_circuit(norb, nelec, mean, var)
     bitstrings, _ = get_bitstrings_and_probs(circuit, norb, nelec)
-    
+
     probs1 = raw_estimate(
         circuit=ucj_to_compatible(circuit),
         outcome_states=bitstrings,
@@ -270,6 +270,8 @@ def test_different_seeds_produce_different_results():
         p=p,
         seed=123,
     )
-    
+
     max_diff = np.max(np.abs(probs1 - probs2))
-    assert max_diff > 1e-10, f"Results with different seeds are too similar: max_diff = {max_diff}"
+    assert max_diff > 1e-10, (
+        f"Results with different seeds are too similar: max_diff = {max_diff}"
+    )
