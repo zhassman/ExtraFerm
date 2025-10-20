@@ -1,8 +1,10 @@
 from typing import Sequence, Union
+
 import numpy as np
 from qiskit.circuit import QuantumCircuit
-from .utils import extract_circuit_data
+
 from . import _lib as _rust
+from .utils import extract_circuit_data
 
 
 def exact_calculation(

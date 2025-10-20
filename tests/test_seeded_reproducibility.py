@@ -1,13 +1,13 @@
-import pytest
 import numpy as np
 from numpy.testing import assert_allclose
-from extraferm.raw_estimation import raw_estimate, raw_estimate_lucj
+
 from extraferm.estimation import estimate
 from extraferm.interface import outcome_probabilities
+from extraferm.raw_estimation import raw_estimate, raw_estimate_lucj
 from extraferm.utils import ucj_to_compatible
 from extraferm.utils_dev import (
     get_bitstrings_and_probs,
-    make_parameterized_controlled_phase_circuit
+    make_parameterized_controlled_phase_circuit,
 )
 
 

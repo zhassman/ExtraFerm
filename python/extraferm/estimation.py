@@ -1,8 +1,11 @@
-from typing import Union, Sequence, Optional
+from typing import Optional, Sequence, Union
+
 import numpy as np
 from qiskit.circuit import QuantumCircuit
+
 from . import _lib as _rust
 from .utils import extract_circuit_data, is_lucj
+
 
 def estimate(
     *,

@@ -1,10 +1,12 @@
-from typing import Optional, Union, Sequence
+from typing import Optional, Sequence, Union
+
 import numpy as np
 from qiskit.circuit import QuantumCircuit
-from .utils import extract_circuit_data, calculate_trajectory_count, is_lucj
-from . import _lib as _rust
 
-    
+from . import _lib as _rust
+from .utils import calculate_trajectory_count, extract_circuit_data, is_lucj
+
+
 def raw_estimate(
     *,
     circuit: QuantumCircuit,

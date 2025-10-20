@@ -1,9 +1,10 @@
-from scipy.linalg import block_diag
-import numpy as np
 import math
 from typing import NamedTuple
+
+import numpy as np
 from numpy.typing import NDArray
 from qiskit.circuit import QuantumCircuit
+from scipy.linalg import block_diag
 
 
 class CircuitData(NamedTuple):

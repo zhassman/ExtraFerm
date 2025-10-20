@@ -1,8 +1,9 @@
-import numpy as np
 import math
 from typing import Optional
-from qiskit.circuit import QuantumCircuit, QuantumRegister
+
 import ffsim
+import numpy as np
+from qiskit.circuit import QuantumCircuit, QuantumRegister
 
 
 def make_parameterized_controlled_phase_circuit(

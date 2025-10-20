@@ -1,11 +1,12 @@
-from .exact import exact_calculation
-from .raw_estimation import raw_estimate
-from .raw_estimation import raw_estimate_lucj
-from .utils import is_lucj
-from .estimation import estimate
-from typing import Union, Optional, Sequence
+from typing import Optional, Sequence, Union
+
 import numpy as np
 from qiskit.circuit import QuantumCircuit
+
+from .estimation import estimate
+from .exact import exact_calculation
+from .raw_estimation import raw_estimate, raw_estimate_lucj
+from .utils import is_lucj
 
 
 def outcome_probabilities(
