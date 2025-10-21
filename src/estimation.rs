@@ -1,13 +1,12 @@
-use pyo3::prelude::*;
-use numpy::{PyArray1, PyArray2, PyArray3, PyArrayMethods};
-use num_complex::Complex64;
-use std::f64::consts::{PI, E};
-use rayon::prelude::*;
 use ndarray::{Array2, Array3};
+use num_complex::Complex64;
+use numpy::{PyArray1, PyArray2, PyArray3, PyArrayMethods};
+use pyo3::prelude::*;
+use rayon::prelude::*;
+use std::f64::consts::{E, PI};
 
 use crate::raw_estimation::raw_estimate_internal;
 use crate::raw_estimation_lucj::raw_estimate_lucj_internal;
-
 
 fn calculate_epsilon(p: f64, delta: f64, s: usize, extent: f64) -> f64 {
     let sqrt_p = p.sqrt();
@@ -17,7 +16,6 @@ fn calculate_epsilon(p: f64, delta: f64, s: usize, extent: f64) -> f64 {
     -p + (sqrt_p + (sqrt_extent + sqrt_p) * last_term).powi(2)
 }
 
-
 fn calculate_trajectory_count(epsilon: f64, delta: f64, extent: f64, p: f64) -> usize {
     let root_e = extent.sqrt();
     let root_p = p.sqrt();
@@ -26,7 +24,6 @@ fn calculate_trajectory_count(epsilon: f64, delta: f64, extent: f64, p: f64) -> 
     let denominator = ((p + epsilon).sqrt() - root_p).powi(2);
     (2.0 * numerator * log_term / denominator).ceil() as usize
 }
-
 
 pub fn estimate_internal(
     num_qubits: usize,
@@ -45,8 +42,6 @@ pub fn estimate_internal(
     orb_mats_arr: &Array3<Complex64>,
     seed: u64,
 ) -> f64 {
-
-
     let mut p_star = 1.0;
     let mut p_hat = 1.0;
     let mut exit_condition = false;
@@ -109,7 +104,6 @@ pub fn estimate_internal(
     p_hat
 }
 
-
 #[pyfunction]
 pub fn estimate_single(
     num_qubits: usize,
@@ -153,7 +147,6 @@ pub fn estimate_single(
         seed,
     ))
 }
-
 
 #[pyfunction]
 pub fn estimate_batch(

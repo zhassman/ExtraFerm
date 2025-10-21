@@ -40,7 +40,9 @@ def test_six_qubit_estimate(mean, converter):
     circuit = make_parameterized_controlled_phase_circuit(norb, nelec, mean, var)
     bitstrings, exact_probs = get_bitstrings_and_probs(circuit, norb, nelec)
     converted = converter(circuit)
-    probs = estimate(circuit=converted, outcome_states=bitstrings, epsilon=epsilon, delta=delta)
+    probs = estimate(
+        circuit=converted, outcome_states=bitstrings, epsilon=epsilon, delta=delta
+    )
     assert_allclose(probs, exact_probs, rtol=0, atol=0.05)
 
 
@@ -63,5 +65,7 @@ def test_large_circuit_estimate(
     bitstrings = bitstrings[:sample_size]
     exact_probs = exact_probs[:sample_size]
     converted = converter(circuit)
-    probs = estimate(circuit=converted, outcome_states=bitstrings, epsilon=epsilon, delta=delta)
+    probs = estimate(
+        circuit=converted, outcome_states=bitstrings, epsilon=epsilon, delta=delta
+    )
     assert_allclose(probs, exact_probs, rtol=0, atol=0.05)

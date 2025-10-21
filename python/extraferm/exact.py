@@ -13,7 +13,8 @@ def exact_calculation(
     outcome_states: Union[int, Sequence[int]],
 ) -> Union[float, np.ndarray]:
     """
-    Exact calculation of circuit outcome probabilities by summing over all controlled-phase masks.
+    Exact calculation of circuit outcome probabilities by summing over all
+    controlled-phase masks.
 
     Args:
         circuit: QuantumCircuit object

@@ -13,8 +13,8 @@ def raw_estimate(
     outcome_states: Union[int, Sequence[int]],
     trajectory_count: Optional[int] = None,
     epsilon: Optional[float] = None,
-    delta:   Optional[float] = None,
-    p:       Optional[float] = None,
+    delta: Optional[float] = None,
+    p: Optional[float] = None,
     reuse_trajectories: Optional[bool] = False,
     seed: Optional[int] = None,
 ) -> Union[float, np.ndarray]:
@@ -36,7 +36,10 @@ def raw_estimate(
     Returns a float for a single state, or an ndarray for multiple.
     """
     if reuse_trajectories and isinstance(outcome_states, int):
-        raise ValueError("'reuse_trajectories=True' only makes sense when 'outcome_states' is a sequence")
+        raise ValueError(
+            "'reuse_trajectories=True' only makes sense when 'outcome_states' is a "
+            "sequence"
+        )
 
     circuit_data = extract_circuit_data(circuit)
 
@@ -54,15 +57,21 @@ def raw_estimate(
     accuracy_args = (epsilon is not None) and (delta is not None) and (p is not None)
     if (trajectory_count is None) == (not accuracy_args):
         raise ValueError(
-            "Must pass either 'trajectory_count' or all of 'epsilon, delta, p' but not both."
+            "Must pass either 'trajectory_count' or all of 'epsilon, delta, p' but not "
+            "both."
         )
 
-    t = trajectory_count if (trajectory_count is not None) else calculate_trajectory_count(epsilon, delta, p, extent)
-    
+    t = (
+        trajectory_count
+        if (trajectory_count is not None)
+        else calculate_trajectory_count(epsilon, delta, p, extent)
+    )
+
     if seed is None:
         import random
+
         seed = random.getrandbits(64)
-    
+
     if isinstance(outcome_states, int):
         return _rust.raw_estimate_single(
             num_qubits,
@@ -80,7 +89,6 @@ def raw_estimate(
             seed,
         )
     else:
-        
         if reuse_trajectories:
             return _rust.raw_estimate_reuse(
                 num_qubits,
@@ -118,12 +126,12 @@ def raw_estimate(
 
 def raw_estimate_lucj(
     *,
-    circuit: Optional[QuantumCircuit]   = None,
+    circuit: Optional[QuantumCircuit] = None,
     outcome_states: Union[int, Sequence[int]],
     trajectory_count: Optional[int] = None,
     epsilon: Optional[float] = None,
-    delta:   Optional[float] = None,
-    p:       Optional[float] = None,
+    delta: Optional[float] = None,
+    p: Optional[float] = None,
     seed: Optional[int] = None,
 ) -> Union[float, np.ndarray]:
     """
@@ -132,7 +140,7 @@ def raw_estimate_lucj(
 
     X* , orb_rot_jw , CP* , orb_rot_jw.
 
-    This function returns a Monte-Carlo estimate for one or more 
+    This function returns a Monte-Carlo estimate for one or more
     outcome_states(s). Pass:
       - exactly one of circuit or circuit_data, and
       - exactly one of (trajectory_count) or (epsilon,delta,p).
@@ -163,44 +171,50 @@ def raw_estimate_lucj(
     accuracy_args = (epsilon is not None) and (delta is not None) and (p is not None)
     if (trajectory_count is None) == (not accuracy_args):
         raise ValueError(
-            "Must pass either 'trajectory_count' or all of 'epsilon, delta, p' but not both."
+            "Must pass either 'trajectory_count' or all of 'epsilon, delta, p' but not "
+            "both."
         )
 
-    t = trajectory_count if (trajectory_count is not None) else calculate_trajectory_count(epsilon, delta, p, extent)
-    
+    t = (
+        trajectory_count
+        if (trajectory_count is not None)
+        else calculate_trajectory_count(epsilon, delta, p, extent)
+    )
+
     if seed is None:
         import random
+
         seed = random.getrandbits(64)
 
     if isinstance(outcome_states, int):
         return _rust.raw_estimate_lucj_single(
-                num_qubits,
-                normalized_angles,
-                negative_mask,
-                extent,
-                initial_state,
-                outcome_states,
-                t,
-                gate_types,
-                params,
-                qubits,
-                orb_indices,
-                orb_mats,
-                seed,
-            )
+            num_qubits,
+            normalized_angles,
+            negative_mask,
+            extent,
+            initial_state,
+            outcome_states,
+            t,
+            gate_types,
+            params,
+            qubits,
+            orb_indices,
+            orb_mats,
+            seed,
+        )
     else:
         return _rust.raw_estimate_lucj_batch(
-                num_qubits,
-                normalized_angles,
-                negative_mask,
-                extent,
-                initial_state,
-                outcome_states,
-                t,
-                gate_types,
-                params,
-                qubits,
-                orb_indices,
-                orb_mats,
-                seed,
-            )
+            num_qubits,
+            normalized_angles,
+            negative_mask,
+            extent,
+            initial_state,
+            outcome_states,
+            t,
+            gate_types,
+            params,
+            qubits,
+            orb_indices,
+            orb_mats,
+            seed,
+        )

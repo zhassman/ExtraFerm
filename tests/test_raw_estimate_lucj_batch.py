@@ -48,7 +48,12 @@ def test_six_qubit_raw_estimate_lucj(mean):
     ],
 )
 def test_large_circuit_raw_estimate_lucj(
-    norb, nelec, mean, var, sample_size, reduced_interaction,
+    norb,
+    nelec,
+    mean,
+    var,
+    sample_size,
+    reduced_interaction,
 ):
     epsilon, delta, p = 0.1, 0.01, 1
     circuit = make_parameterized_controlled_phase_circuit(

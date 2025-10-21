@@ -1,16 +1,18 @@
+#![allow(clippy::too_many_arguments)]
+
 mod core;
+mod estimation;
+mod exact;
 mod raw_estimation;
 mod raw_estimation_lucj;
-mod exact;
-mod estimation;
 
 use pyo3::prelude::*;
 use pyo3::wrap_pyfunction;
 
-use crate::raw_estimation::{raw_estimate_single, raw_estimate_batch, raw_estimate_reuse};
-use crate::raw_estimation_lucj::{raw_estimate_lucj_single, raw_estimate_lucj_batch};
+use crate::estimation::{estimate_batch, estimate_single};
 use crate::exact::exact_calculation;
-use crate::estimation::{estimate_single, estimate_batch};
+use crate::raw_estimation::{raw_estimate_batch, raw_estimate_reuse, raw_estimate_single};
+use crate::raw_estimation_lucj::{raw_estimate_lucj_batch, raw_estimate_lucj_single};
 
 #[pymodule]
 fn _lib(_py: Python, m: &Bound<'_, PyModule>) -> PyResult<()> {
