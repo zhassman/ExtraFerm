@@ -31,7 +31,6 @@ module-name = "extraferm._lib"
 
 [tool.ruff]
 src = ["python"]
-ignore = ["F403"]
 include = [
   "pyproject.toml",
   "python/**/*.py",
