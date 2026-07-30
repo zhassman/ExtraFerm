@@ -7,6 +7,10 @@ from qiskit.circuit import QuantumCircuit
 from scipy.linalg import block_diag
 
 
+# Gate types which do not alter teh matchgate analysis
+NOOP_GATES = ["barrier", "measure", "global_phase"]
+
+
 class CircuitData(NamedTuple):
     """Circuit data structure for the Rust backend."""
 
@@ -69,8 +73,7 @@ def extract_circuit_data(circuit: QuantumCircuit) -> CircuitData:
     """
     num_qubits = circuit.num_qubits
     controlled_phase_angles = []
-    initial_state = 0
-    seen_non_x = False
+    initial_state = get_initial_state(circuit)
 
     gate_types = []
     params = []
@@ -80,18 +83,6 @@ def extract_circuit_data(circuit: QuantumCircuit) -> CircuitData:
 
     for instr in circuit.data:
         name = instr.operation.name
-
-        if name == "x":
-            if seen_non_x:
-                raise ValueError(
-                    "All X gates must appear consecutively at the beginning of the "
-                    "circuit."
-                )
-            q = instr.qubits[0]._index
-            initial_state |= 1 << q
-            continue
-
-        seen_non_x = True
 
         if name == "cp":
             gate_types.append(1)
@@ -128,6 +119,10 @@ def extract_circuit_data(circuit: QuantumCircuit) -> CircuitData:
             m = block_diag(a, b)
             orb_mats.append(m)
 
+        elif name in NOOP_GATES or name == 'x':
+            # X gates handled with state initialization
+            continue
+
         else:
             raise ValueError(f"Unexpected gate '{name}' in circuit.")
 
@@ -159,6 +154,40 @@ def extract_circuit_data(circuit: QuantumCircuit) -> CircuitData:
         orb_indices=np.array(orb_indices, dtype=np.int64),
         orb_mats=orb_mats_arr,
     )
+
+
+def get_initial_state(circuit: QuantumCircuit) -> int:
+    """
+    Extract the initial circuit state and check for late-circuit x-gates
+
+    Args:
+        circuit: The quantum circuit
+    """
+    initial_state = 0
+    seen_non_x: set[int] = set()
+
+    for instr in circuit.data:
+        name = instr.operation.name
+
+        if name in NOOP_GATES:
+            continue
+
+        q = {_q._index for _q in instr.qubits}
+
+        if name == "x":
+            if  q.issubset(seen_non_x):
+                raise ValueError(
+                    "All X gates must appear consecutively at the beginning of the "
+                    "circuit."
+                )
+            initial_state |= 1 << instr.qubits[0]._index
+
+        elif name in NOOP_GATES:
+            continue
+
+        seen_non_x.update(q)
+
+    return initial_state
 
 
 def calculate_trajectory_count(
